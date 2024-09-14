@@ -1,9 +1,11 @@
 const express = require("express");
 const path = require("path");
+const { Pool } = require("pg");
+const cors = require("cors");
 
 const app = express();
 const port = process.env.PORT || 3000;
-const { Pool } = require("pg");
+
 
 const pool = new Pool({
   user: "adempiere",
@@ -14,6 +16,7 @@ const pool = new Pool({
 });
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
@@ -57,6 +60,38 @@ app.get("/api/paciente/:cedula", async (req, res) => {
     console.error(err);
     res.status(500).json({ message: "Error en el servidor" });
   }
+});
+
+// Obtener Historia Clínica
+app.get("/api/historia-clinica/:pacienteId/:admisionId", async (req, res) => {
+  try {
+    const { pacienteId, admisionId } = req.params;
+    // Aquí iría la lógica para obtener la historia clínica de la base de datos
+    // Por ahora, devolvemos un objeto vacío
+    res.json({});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error al obtener la historia clínica" });
+  }
+});
+
+// Guardar Historia Clínica
+app.post("/api/historia-clinica", async (req, res) => {
+  try {
+    const historiaClinica = req.body;
+    // Aquí iría la lógica para guardar la historia clínica en la base de datos
+    // Por ahora, solo log y respuesta de éxito
+    console.log("Historia clínica recibida:", historiaClinica);
+    res.json({ message: "Historia clínica guardada con éxito" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error al guardar la historia clínica" });
+  }
+});
+
+// Ruta para manejar todas las demás solicitudes y servir index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public', 'index.html'));
 });
 
 // Iniciar el servidor

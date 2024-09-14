@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import HistoriaClinicaForm from "./HistoriaClinicaForm";
 
 export default function WelcomeScreen() {
   const [cedula, setCedula] = useState("");
   const [paciente, setPaciente] = useState(null);
   const [estudios, setEstudios] = useState([]);
   const [error, setError] = useState("");
+  const [selectedAdmision, setSelectedAdmision] = useState(null);
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -28,11 +30,33 @@ export default function WelcomeScreen() {
     }
   };
 
+  const handleAdmisionSelect = (admision) => {
+    setSelectedAdmision(admision);
+  };
+
+  const handleSaveHistoriaClinica = async (formData) => {
+    try {
+      const response = await fetch("/api/historia-clinica", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        throw new Error("Error al guardar la historia clínica");
+      }
+      console.log("Historia clínica guardada con éxito");
+    } catch (error) {
+      console.error("Error al guardar la historia clínica:", error);
+      setError("Error al guardar la historia clínica");
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-3xl font-bold mb-8">
-        Bienvenido al Sistema Odontológico
-      </h1>
+      <h1 className="text-3xl font-bold mb-8">Sistema Odontológico</h1>
+
       <form onSubmit={handleSearch} className="w-full max-w-md mb-8">
         <div className="flex">
           <input
@@ -54,7 +78,7 @@ export default function WelcomeScreen() {
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       {paciente && (
-        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
+        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl mb-8">
           <h2 className="text-2xl font-semibold mb-4">
             Información del Paciente
           </h2>
@@ -83,9 +107,28 @@ export default function WelcomeScreen() {
                 <p>
                   <strong>Médico:</strong> {estudio.medico_linea}
                 </p>
+                <button
+                  onClick={() => handleAdmisionSelect(estudio)}
+                  className="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                  Ver/Editar Historia Clínica
+                </button>
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {selectedAdmision && (
+        <div className="mt-8 bg-white p-6 rounded-lg shadow-md w-full max-w-4xl">
+          <h2 className="text-2xl font-semibold mb-4">
+            Historia Clínica - Admisión {selectedAdmision.admision}
+          </h2>
+          <HistoriaClinicaForm
+            pacienteId={paciente.cedula}
+            admisionId={selectedAdmision.admision}
+            onSave={handleSaveHistoriaClinica}
+          />
         </div>
       )}
     </div>
