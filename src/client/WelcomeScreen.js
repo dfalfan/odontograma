@@ -1,0 +1,93 @@
+import React, { useState } from "react";
+
+export default function WelcomeScreen() {
+  const [cedula, setCedula] = useState("");
+  const [paciente, setPaciente] = useState(null);
+  const [estudios, setEstudios] = useState([]);
+  const [error, setError] = useState("");
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`/api/paciente/${cedula}`);
+      if (!response.ok) {
+        throw new Error("Paciente no encontrado");
+      }
+      const data = await response.json();
+      if (data.length > 0) {
+        setPaciente(data[0]);
+        setEstudios(data);
+        setError("");
+      } else {
+        setError("No se encontraron registros para este paciente");
+      }
+    } catch (err) {
+      setError(err.message);
+      setPaciente(null);
+      setEstudios([]);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <h1 className="text-3xl font-bold mb-8">
+        Bienvenido al Sistema Odontológico
+      </h1>
+      <form onSubmit={handleSearch} className="w-full max-w-md mb-8">
+        <div className="flex">
+          <input
+            type="text"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+            placeholder="Ingrese la cédula del paciente"
+            className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600"
+          >
+            Buscar
+          </button>
+        </div>
+      </form>
+
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
+      {paciente && (
+        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl">
+          <h2 className="text-2xl font-semibold mb-4">
+            Información del Paciente
+          </h2>
+          <p>
+            <strong>Nombre:</strong> {paciente.paciente}
+          </p>
+          <p>
+            <strong>Cédula:</strong> {paciente.cedula}
+          </p>
+          <p>
+            <strong>Fecha de Nacimiento:</strong>{" "}
+            {new Date(paciente.nacimiento).toLocaleDateString()}
+          </p>
+
+          <h3 className="text-xl font-semibold mt-6 mb-2">Estudios</h3>
+          <ul>
+            {estudios.map((estudio, index) => (
+              <li key={index} className="mb-2 p-2 bg-gray-100 rounded">
+                <p>
+                  <strong>Fecha:</strong>{" "}
+                  {new Date(estudio.fecha).toLocaleDateString()}
+                </p>
+                <p>
+                  <strong>Servicio:</strong> {estudio.servicio}
+                </p>
+                <p>
+                  <strong>Médico:</strong> {estudio.medico_linea}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
