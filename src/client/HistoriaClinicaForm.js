@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Odontodiagrama from "./Odontodiagrama";
 
 export default function HistoriaClinicaForm({
   pacienteId,
@@ -21,7 +22,7 @@ export default function HistoriaClinicaForm({
         alimentos: false,
         otros: false,
       },
-      especificaciones: "",
+      especifiqueOtros: "",
     },
     habitos: {
       succionDedos: false,
@@ -103,12 +104,29 @@ export default function HistoriaClinicaForm({
     const { name, value, type, checked } = e.target;
     setFormData((prevState) => {
       if (name.includes(".")) {
-        const [section, field] = name.split(".");
+        const [section, subsection, field] = name.split(".");
+        if (section === "alergias" && subsection === "esAlergico" && !checked) {
+          // Si se desmarca "¿Es alérgico a algún medicamento?", resetea todos los tipos
+          return {
+            ...prevState,
+            alergias: {
+              esAlergico: false,
+              tipos: Object.keys(prevState.alergias.tipos).reduce(
+                (acc, key) => ({ ...acc, [key]: false }),
+                {}
+              ),
+              especifiqueOtros: "",
+            },
+          };
+        }
         return {
           ...prevState,
           [section]: {
             ...prevState[section],
-            [field]: type === "checkbox" ? checked : value,
+            [subsection]:
+              subsection === "tipos"
+                ? { ...prevState[section][subsection], [field]: checked }
+                : checked,
           },
         };
       }
@@ -202,7 +220,7 @@ export default function HistoriaClinicaForm({
               </div>
             </div>
             {formData.alergias.esAlergico && (
-              <div className="mt-2 space-y-2">
+              <div className="mt-2 space-y-2 ml-6">
                 {Object.entries(formData.alergias.tipos).map(([key, value]) => (
                   <div key={key} className="flex items-start">
                     <div className="flex items-center h-5">
@@ -225,22 +243,24 @@ export default function HistoriaClinicaForm({
                     </div>
                   </div>
                 ))}
-                <div>
-                  <label
-                    htmlFor="alergiasEspecificaciones"
-                    className="block text-sm font-medium text-gray-700"
-                  >
-                    Especificaciones
-                  </label>
-                  <textarea
-                    id="alergiasEspecificaciones"
-                    name="alergias.especificaciones"
-                    rows={2}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    value={formData.alergias.especificaciones}
-                    onChange={handleInputChange}
-                  />
-                </div>
+                {formData.alergias.tipos.otros && (
+                  <div className="mt-2">
+                    <label
+                      htmlFor="especifiqueOtros"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Especifique
+                    </label>
+                    <textarea
+                      id="especifiqueOtros"
+                      name="alergias.especifiqueOtros"
+                      rows={2}
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      value={formData.alergias.especifiqueOtros}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -309,58 +329,11 @@ export default function HistoriaClinicaForm({
                 onChange={handleInputChange}
               />
             </div>
+
+            <div className="mt-6">
+              <Odontodiagrama />
+            </div>
           </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor="observacionesOdontodiagrama"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Observaciones del Odontodiagrama
-          </label>
-          <textarea
-            id="observacionesOdontodiagrama"
-            name="observacionesOdontodiagrama"
-            rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            value={formData.observacionesOdontodiagrama}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="diagnostico"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Diagnóstico
-          </label>
-          <textarea
-            id="diagnostico"
-            name="diagnostico"
-            rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            value={formData.diagnostico}
-            onChange={handleInputChange}
-          />
-        </div>
-
-        <div>
-          <label
-            htmlFor="pronostico"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Pronóstico
-          </label>
-          <textarea
-            id="pronostico"
-            name="pronostico"
-            rows={3}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            value={formData.pronostico}
-            onChange={handleInputChange}
-          />
         </div>
       </div>
 
