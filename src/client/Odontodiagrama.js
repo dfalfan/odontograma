@@ -159,16 +159,38 @@ export default function Odontodiagrama() {
 
   const [teethState, setTeethState] = useState(initialTeethState);
   const [currentColor, setCurrentColor] = useState("red");
+  const [actionLog, setActionLog] = useState([]);
 
   const handleToothClick = (number, part) => {
-    setTeethState((prevState) => ({
-      ...prevState,
-      [number]: {
-        ...prevState[number],
-        [part]:
-          prevState[number][part] === currentColor ? "white" : currentColor,
-      },
-    }));
+    setTeethState((prevState) => {
+      const newColor =
+        prevState[number][part] === currentColor ? "white" : currentColor;
+
+      // Agregar entrada al registro
+      const action = `Diente ${number} superficie ${translatePart(part)} ${
+        newColor === "white" ? "deseleccionado" : newColor
+      }`;
+      setActionLog((prevLog) => [...prevLog, action]);
+
+      return {
+        ...prevState,
+        [number]: {
+          ...prevState[number],
+          [part]: newColor,
+        },
+      };
+    });
+  };
+
+  const translatePart = (part) => {
+    const translations = {
+      top: "oclusal/incisal",
+      bottom: "oclusal/incisal",
+      left: "vestibular",
+      right: "palatino/lingual",
+      center: "centro",
+    };
+    return translations[part] || part;
   };
 
   const leftColumn = {
@@ -222,6 +244,16 @@ export default function Odontodiagrama() {
           onToothClick={handleToothClick}
         />
       </svg>
+      <div className="mt-4">
+        <h4 className="text-md font-medium text-gray-900 mb-2">
+          Registro de Acciones:
+        </h4>
+        <ul className="list-disc pl-5">
+          {actionLog.map((action, index) => (
+            <li key={index}>{action}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
