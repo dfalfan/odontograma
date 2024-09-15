@@ -143,7 +143,7 @@ const TeethColumn = ({ adult, child, x, teethState, onToothClick }) => {
   );
 };
 
-export default function Odontodiagrama() {
+export default function Odontodiagrama({ onChange }) {
   const initialTeethState = Object.fromEntries(
     [...Array(89).keys()].map((n) => [
       n,
@@ -166,19 +166,22 @@ export default function Odontodiagrama() {
       const newColor =
         prevState[number][part] === currentColor ? "white" : currentColor;
 
-      // Agregar entrada al registro
       const action = `Diente ${number} superficie ${translatePart(part)} ${
         newColor === "white" ? "deseleccionado" : newColor
       }`;
-      setActionLog((prevLog) => [...prevLog, action]);
+      const newLog = [...actionLog, action];
+      setActionLog(newLog);
 
-      return {
+      const newState = {
         ...prevState,
         [number]: {
           ...prevState[number],
           [part]: newColor,
         },
       };
+
+      onChange(newState, newLog);
+      return newState;
     });
   };
 
@@ -210,45 +213,51 @@ export default function Odontodiagrama() {
   };
 
   return (
-    <div className="mt-6">
-      <h3 className="text-lg font-medium text-gray-900 mb-2">Odontodiagrama</h3>
-      <div className="mb-4">
+    <div className="bg-white p-4 rounded-lg shadow">
+      <h3 className="text-lg font-medium text-blue-900 mb-4">Odontodiagrama</h3>
+      <div className="mb-4 flex space-x-2">
         <button
           onClick={() => setCurrentColor("red")}
-          className={`px-4 py-2 mr-2 rounded ${
-            currentColor === "red" ? "bg-red-500 text-white" : "bg-red-200"
+          className={`px-4 py-2 rounded-md transition-colors ${
+            currentColor === "red"
+              ? "bg-red-600 text-white"
+              : "bg-red-100 text-red-600 hover:bg-red-200"
           }`}
         >
           Rojo
         </button>
         <button
           onClick={() => setCurrentColor("blue")}
-          className={`px-4 py-2 mr-2 rounded ${
-            currentColor === "blue" ? "bg-blue-500 text-white" : "bg-blue-200"
+          className={`px-4 py-2 rounded-md transition-colors ${
+            currentColor === "blue"
+              ? "bg-blue-600 text-white"
+              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
           }`}
         >
           Azul
         </button>
       </div>
-      <svg width="600" height="300" viewBox="0 0 600 300">
-        <TeethColumn
-          {...leftColumn}
-          x={0}
-          teethState={teethState}
-          onToothClick={handleToothClick}
-        />
-        <TeethColumn
-          {...rightColumn}
-          x={300}
-          teethState={teethState}
-          onToothClick={handleToothClick}
-        />
-      </svg>
+      <div className="bg-gray-50 p-4 rounded-lg mb-4">
+        <svg width="100%" height="auto" viewBox="0 0 600 300">
+          <TeethColumn
+            {...leftColumn}
+            x={0}
+            teethState={teethState}
+            onToothClick={handleToothClick}
+          />
+          <TeethColumn
+            {...rightColumn}
+            x={300}
+            teethState={teethState}
+            onToothClick={handleToothClick}
+          />
+        </svg>
+      </div>
       <div className="mt-4">
-        <h4 className="text-md font-medium text-gray-900 mb-2">
+        <h4 className="text-md font-medium text-blue-900 mb-2">
           Registro de Acciones:
         </h4>
-        <ul className="list-disc pl-5">
+        <ul className="list-disc pl-5 text-sm text-gray-600 max-h-40 overflow-y-auto">
           {actionLog.map((action, index) => (
             <li key={index}>{action}</li>
           ))}
