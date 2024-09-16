@@ -220,6 +220,27 @@ const toothNames = {
   46: "Primer molar inferior derecho",
   47: "Segundo molar inferior derecho",
   48: "Tercer molar inferior derecho",
+  // Dientes de leche
+  51: "Incisivo central superior derecho temporal",
+  52: "Incisivo lateral superior derecho temporal",
+  53: "Canino superior derecho temporal",
+  54: "Primer molar superior derecho temporal",
+  55: "Segundo molar superior derecho temporal",
+  61: "Incisivo central superior izquierdo temporal",
+  62: "Incisivo lateral superior izquierdo temporal",
+  63: "Canino superior izquierdo temporal",
+  64: "Primer molar superior izquierdo temporal",
+  65: "Segundo molar superior izquierdo temporal",
+  71: "Incisivo central inferior izquierdo temporal",
+  72: "Incisivo lateral inferior izquierdo temporal",
+  73: "Canino inferior izquierdo temporal",
+  74: "Primer molar inferior izquierdo temporal",
+  75: "Segundo molar inferior izquierdo temporal",
+  81: "Incisivo central inferior derecho temporal",
+  82: "Incisivo lateral inferior derecho temporal",
+  83: "Canino inferior derecho temporal",
+  84: "Primer molar inferior derecho temporal",
+  85: "Segundo molar inferior derecho temporal",
 };
 
 const dentalConditions = [
