@@ -54,13 +54,16 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-8 animated-gradient">
       <div className="max-w-6xl mx-auto">
-        <img src="/images/minilogobn.png" alt="Logo" className="mx-auto mb-6 h-20" />
-        <h1 className="text-4xl font-extrabold text-gray-800 mb-12 text-center">
+        <img
+          src="/images/minilogobn.png"
+          alt="Logo"
+          className="mx-auto mb-6 h-20"
+        />
+        <h1 className="text-4xl font-extrabold text-blue-600 mb-12 text-center text-shadow">
           Sistema Odontológico
         </h1>
-
         <form onSubmit={handleSearch} className="mb-12">
           <div className="flex shadow-lg rounded-lg overflow-hidden">
             <input
