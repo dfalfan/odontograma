@@ -54,83 +54,109 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <h1 className="text-3xl font-bold mb-8">Sistema Odontológico</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-8">
+      <div className="max-w-6xl mx-auto">
+        <img src="/images/minilogobn.png" alt="Logo" className="mx-auto mb-6 h-20" />
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-12 text-center">
+          Sistema Odontológico
+        </h1>
 
-      <form onSubmit={handleSearch} className="w-full max-w-md mb-8">
-        <div className="flex">
-          <input
-            type="text"
-            value={cedula}
-            onChange={(e) => setCedula(e.target.value)}
-            placeholder="Ingrese la cédula del paciente"
-            className="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-500 text-white rounded-r-md hover:bg-blue-600"
-          >
-            Buscar
-          </button>
-        </div>
-      </form>
+        <form onSubmit={handleSearch} className="mb-12">
+          <div className="flex shadow-lg rounded-lg overflow-hidden">
+            <input
+              type="text"
+              value={cedula}
+              onChange={(e) => setCedula(e.target.value)}
+              placeholder="Ingrese la cédula del paciente"
+              className="flex-grow px-6 py-4 text-lg focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="bg-blue-600 text-white px-8 py-4 text-lg font-semibold transition duration-300 ease-in-out hover:bg-blue-700"
+            >
+              Buscar
+            </button>
+          </div>
+        </form>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-600 text-center mb-8 font-medium">{error}</p>
+        )}
 
-      {paciente && (
-        <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-2xl mb-8">
-          <h2 className="text-2xl font-semibold mb-4">
-            Información del Paciente
-          </h2>
-          <p>
-            <strong>Nombre:</strong> {paciente.paciente}
-          </p>
-          <p>
-            <strong>Cédula:</strong> {paciente.cedula}
-          </p>
-          <p>
-            <strong>Fecha de Nacimiento:</strong>{" "}
-            {new Date(paciente.nacimiento).toLocaleDateString()}
-          </p>
+        {paciente && (
+          <div className="bg-white rounded-xl shadow-xl p-8 mb-12 transition duration-300 ease-in-out hover:shadow-2xl">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">
+              Información del Paciente
+            </h2>
+            <div className="grid grid-cols-2 gap-6 mb-8">
+              <p className="text-lg">
+                <span className="font-semibold text-gray-600">Nombre:</span>{" "}
+                {paciente.paciente}
+              </p>
+              <p className="text-lg">
+                <span className="font-semibold text-gray-600">Cédula:</span>{" "}
+                {paciente.cedula}
+              </p>
+              <p className="text-lg">
+                <span className="font-semibold text-gray-600">
+                  Fecha de Nacimiento:
+                </span>{" "}
+                {new Date(paciente.nacimiento).toLocaleDateString()}
+              </p>
+            </div>
 
-          <h3 className="text-xl font-semibold mt-6 mb-2">Estudios</h3>
-          <ul>
-            {estudios.map((estudio, index) => (
-              <li key={index} className="mb-2 p-2 bg-gray-100 rounded">
-                <p>
-                  <strong>Fecha:</strong>{" "}
-                  {new Date(estudio.fecha).toLocaleDateString()}
-                </p>
-                <p>
-                  <strong>Servicio:</strong> {estudio.servicio}
-                </p>
-                <p>
-                  <strong>Médico:</strong> {estudio.medico_linea}
-                </p>
-                <button
-                  onClick={() => handleAdmisionSelect(estudio)}
-                  className="mt-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">Estudios</h3>
+            <ul className="space-y-4">
+              {estudios.map((estudio, index) => (
+                <li
+                  key={index}
+                  className="bg-gray-50 rounded-lg p-4 shadow transition duration-300 ease-in-out hover:shadow-md"
                 >
-                  Ver/Editar Historia Clínica
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+                  <div className="grid grid-cols-3 gap-4 mb-3">
+                    <p>
+                      <span className="font-semibold text-gray-600">
+                        Fecha:
+                      </span>{" "}
+                      {new Date(estudio.fecha).toLocaleDateString()}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-600">
+                        Servicio:
+                      </span>{" "}
+                      {estudio.servicio}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-gray-600">
+                        Médico:
+                      </span>{" "}
+                      {estudio.medico_linea}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => handleAdmisionSelect(estudio)}
+                    className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold transition duration-300 ease-in-out hover:bg-blue-700"
+                  >
+                    Ver/Editar Historia Clínica
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-      {selectedAdmision && (
-        <div className="mt-8 bg-white p-6 rounded-lg shadow-md w-full max-w-4xl">
-          <h2 className="text-2xl font-semibold mb-4">
-            Historia Clínica - Admisión {selectedAdmision.admision}
-          </h2>
-          <HistoriaClinicaForm
-            pacienteId={paciente.cedula}
-            admisionId={selectedAdmision.admision}
-            onSave={handleSaveHistoriaClinica}
-          />
-        </div>
-      )}
+        {selectedAdmision && (
+          <div className="bg-white rounded-xl shadow-xl p-8 transition duration-300 ease-in-out hover:shadow-2xl">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">
+              Historia Clínica - Admisión {selectedAdmision.admision}
+            </h2>
+            <HistoriaClinicaForm
+              pacienteId={paciente.cedula}
+              admisionId={selectedAdmision.admision}
+              onSave={handleSaveHistoriaClinica}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
