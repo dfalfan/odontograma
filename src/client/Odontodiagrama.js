@@ -53,38 +53,82 @@ const Tooth = ({ number, parts, onClick }) => {
     ].join(" ");
   };
 
+  const renderToothPart = (part, d) => {
+    const textPosition = {
+      top: polarToCartesian(
+        center,
+        center,
+        (outerRadius + innerRadius) / 2,
+        90
+      ),
+      bottom: polarToCartesian(
+        center,
+        center,
+        (outerRadius + innerRadius) / 2,
+        270
+      ),
+      left: polarToCartesian(
+        center,
+        center,
+        (outerRadius + innerRadius) / 2,
+        180
+      ),
+      right: polarToCartesian(
+        center,
+        center,
+        (outerRadius + innerRadius) / 2,
+        0
+      ),
+      center: { x: center, y: center },
+    };
+
+    return (
+      <g key={part}>
+        <ToothPart
+          d={d}
+          fill={parts[part].color}
+          onClick={() => onClick(number, part)}
+        />
+        {parts[part].code && (
+          <text
+            x={textPosition[part].x}
+            y={textPosition[part].y}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fill={parts[part].color === "white" ? "black" : "white"}
+            fontSize="6"
+            pointerEvents="none" // Hace que el texto no sea interactivo
+            style={{ userSelect: "none" }} // Previene la selección del texto
+          >
+            {parts[part].code}
+          </text>
+        )}
+      </g>
+    );
+  };
+
   return (
     <g>
-      <ToothPart
-        d={createSection(45, 135)}
-        fill={parts.top}
-        onClick={() => onClick(number, "top")}
-      />
-      <ToothPart
-        d={createSection(135, 225)}
-        fill={parts.left}
-        onClick={() => onClick(number, "left")}
-      />
-      <ToothPart
-        d={createSection(225, 315)}
-        fill={parts.bottom}
-        onClick={() => onClick(number, "bottom")}
-      />
-      <ToothPart
-        d={createSection(315, 45)}
-        fill={parts.right}
-        onClick={() => onClick(number, "right")}
-      />
-      <circle
-        cx={center}
-        cy={center}
-        r={innerRadius}
-        fill={parts.center}
-        stroke="black"
-        strokeWidth="0.5"
-        onClick={() => onClick(number, "center")}
-      />
-      <text x={center} y={size + 10} textAnchor="middle" fontSize="8">
+      {renderToothPart("top", createSection(45, 135))}
+      {renderToothPart("left", createSection(135, 225))}
+      {renderToothPart("bottom", createSection(225, 315))}
+      {renderToothPart("right", createSection(315, 45))}
+      {renderToothPart(
+        "center",
+        `M${
+          center - innerRadius
+        },${center} a${innerRadius},${innerRadius} 0 1,0 ${
+          innerRadius * 2
+        },0 a${innerRadius},${innerRadius} 0 1,0 -${innerRadius * 2},0`
+      )}
+      <text
+        x={center}
+        y={size + 10}
+        textAnchor="middle"
+        fontSize="8"
+        pointerEvents="none"
+        style={{ userSelect: "none" }}
+      >
         {number}
       </text>
     </g>
@@ -143,46 +187,93 @@ const TeethColumn = ({ adult, child, x, teethState, onToothClick }) => {
   );
 };
 
+const dentalConditions = [
+  { name: "Diente obturado", code: "Do", color: "blue" },
+  { name: "Cariado", code: "C", color: "red" },
+  { name: "Ausente", code: "=", color: "blue" },
+  { name: "Exodoncia", code: "X", color: "red" },
+  { name: "Caries penetrante", code: "CP", color: "red" },
+  { name: "Retenido", code: "r", color: "red" },
+  { name: "Pieza de puente", code: "PP", color: "blue" },
+  { name: "Corona", code: "Co", color: "blue" },
+  { name: "Prótesis removible", code: "Pr", color: "blue" },
+  { name: "Incrustación", code: "loc", color: "blue" },
+  { name: "Enfermedad periodontal", code: "EP", color: "red" },
+  { name: "Fractura dentaria", code: "FD", color: "red" },
+  { name: "Mal posición dentaria", code: "MPD", color: "red" },
+  { name: "Perno munon", code: "PM", color: "blue" },
+  { name: "Tratamiento de conducto", code: "TC", color: "blue" },
+  { name: "Fluoresis", code: "F", color: "red" },
+  { name: "Implante dental", code: "Imp", color: "blue" },
+  { name: "Mancha blanca", code: "MB", color: "red" },
+  { name: "Sellador", code: "Se", color: "blue" },
+  { name: "Surco profundo o remineralizado", code: "SPSR", color: "blue" },
+  { name: "Hipoplasia de esmalte", code: "Hp", color: "blue" },
+];
+
 export default function Odontodiagrama({ onChange }) {
   const initialTeethState = Object.fromEntries(
     [...Array(89).keys()].map((n) => [
       n,
       {
-        top: "white",
-        left: "white",
-        bottom: "white",
-        right: "white",
-        center: "white",
+        top: { color: "white", code: "" },
+        left: { color: "white", code: "" },
+        bottom: { color: "white", code: "" },
+        right: { color: "white", code: "" },
+        center: { color: "white", code: "" },
       },
     ])
   );
 
   const [teethState, setTeethState] = useState(initialTeethState);
-  const [currentColor, setCurrentColor] = useState("red");
-  const [actionLog, setActionLog] = useState([]);
+  const [currentCondition, setCurrentCondition] = useState(dentalConditions[0]);
 
   const handleToothClick = (number, part) => {
     setTeethState((prevState) => {
-      const newColor =
-        prevState[number][part] === currentColor ? "white" : currentColor;
+      const newState = { ...prevState[number][part] };
 
-      const action = `Diente ${number} superficie ${translatePart(part)} ${
-        newColor === "white" ? "deseleccionado" : newColor
-      }`;
-      const newLog = [...actionLog, action];
-      setActionLog(newLog);
+      if (
+        newState.color === currentCondition.color &&
+        newState.code === currentCondition.code
+      ) {
+        // Deseleccionar
+        newState.color = "white";
+        newState.code = "";
+      } else {
+        // Seleccionar nueva condición
+        newState.color = currentCondition.color;
+        newState.code = currentCondition.code;
+      }
 
-      const newState = {
+      const updatedState = {
         ...prevState,
         [number]: {
           ...prevState[number],
-          [part]: newColor,
+          [part]: newState,
         },
       };
 
-      onChange(newState, newLog);
-      return newState;
+      onChange(updatedState);
+      return updatedState;
     });
+  };
+
+  // Función para generar el resumen activo
+  const generateActiveSummary = () => {
+    const summary = [];
+    Object.entries(teethState).forEach(([number, parts]) => {
+      Object.entries(parts).forEach(([part, state]) => {
+        if (state.code) {
+          const condition = dentalConditions.find((c) => c.code === state.code);
+          summary.push(
+            `Diente ${number} superficie ${translatePart(part)} ${
+              condition.name
+            }`
+          );
+        }
+      });
+    });
+    return summary;
   };
 
   const translatePart = (part) => {
@@ -215,27 +306,20 @@ export default function Odontodiagrama({ onChange }) {
   return (
     <div className="bg-white p-4 rounded-lg shadow">
       <h3 className="text-lg font-medium text-blue-900 mb-4">Odontodiagrama</h3>
-      <div className="mb-4 flex space-x-2">
-        <button
-          onClick={() => setCurrentColor("red")}
-          className={`px-4 py-2 rounded-md transition-colors ${
-            currentColor === "red"
-              ? "bg-red-600 text-white"
-              : "bg-red-100 text-red-600 hover:bg-red-200"
-          }`}
-        >
-          Rojo
-        </button>
-        <button
-          onClick={() => setCurrentColor("blue")}
-          className={`px-4 py-2 rounded-md transition-colors ${
-            currentColor === "blue"
-              ? "bg-blue-600 text-white"
-              : "bg-blue-100 text-blue-600 hover:bg-blue-200"
-          }`}
-        >
-          Azul
-        </button>
+      <div className="mb-4 flex flex-wrap gap-2">
+        {dentalConditions.map((condition) => (
+          <button
+            key={condition.code}
+            onClick={() => setCurrentCondition(condition)}
+            className={`px-3 py-1 rounded-md text-sm transition-colors ${
+              currentCondition.code === condition.code
+                ? `bg-${condition.color}-600 text-white`
+                : `bg-${condition.color}-100 text-${condition.color}-600 hover:bg-${condition.color}-200`
+            }`}
+          >
+            {condition.name}
+          </button>
+        ))}
       </div>
       <div className="bg-gray-50 p-4 rounded-lg mb-4">
         <svg width="100%" height="auto" viewBox="0 0 600 300">
@@ -253,13 +337,13 @@ export default function Odontodiagrama({ onChange }) {
           />
         </svg>
       </div>
-      <div className="mt-4">
+     <div className="mt-4">
         <h4 className="text-md font-medium text-blue-900 mb-2">
-          Registro de Acciones:
+          Resumen de Condiciones Actuales:
         </h4>
         <ul className="list-disc pl-5 text-sm text-gray-600 max-h-40 overflow-y-auto">
-          {actionLog.map((action, index) => (
-            <li key={index}>{action}</li>
+          {generateActiveSummary().map((item, index) => (
+            <li key={index}>{item}</li>
           ))}
         </ul>
       </div>
