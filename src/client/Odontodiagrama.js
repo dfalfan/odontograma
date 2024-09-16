@@ -187,6 +187,41 @@ const TeethColumn = ({ adult, child, x, teethState, onToothClick }) => {
   );
 };
 
+const toothNames = {
+  11: "Incisivo central superior derecho",
+  12: "Incisivo lateral superior derecho",
+  13: "Canino superior derecho",
+  14: "Primer premolar superior derecho",
+  15: "Segundo premolar superior derecho",
+  16: "Primer molar superior derecho",
+  17: "Segundo molar superior derecho",
+  18: "Tercer molar superior derecho",
+  21: "Incisivo central superior izquierdo",
+  22: "Incisivo lateral superior izquierdo",
+  23: "Canino superior izquierdo",
+  24: "Primer premolar superior izquierdo",
+  25: "Segundo premolar superior izquierdo",
+  26: "Primer molar superior izquierdo",
+  27: "Segundo molar superior izquierdo",
+  28: "Tercer molar superior izquierdo",
+  31: "Incisivo central inferior izquierdo",
+  32: "Incisivo lateral inferior izquierdo",
+  33: "Canino inferior izquierdo",
+  34: "Primer premolar inferior izquierdo",
+  35: "Segundo premolar inferior izquierdo",
+  36: "Primer molar inferior izquierdo",
+  37: "Segundo molar inferior izquierdo",
+  38: "Tercer molar inferior izquierdo",
+  41: "Incisivo central inferior derecho",
+  42: "Incisivo lateral inferior derecho",
+  43: "Canino inferior derecho",
+  44: "Primer premolar inferior derecho",
+  45: "Segundo premolar inferior derecho",
+  46: "Primer molar inferior derecho",
+  47: "Segundo molar inferior derecho",
+  48: "Tercer molar inferior derecho",
+};
+
 const dentalConditions = [
   { name: "Diente obturado", code: "Do", color: "blue" },
   { name: "Cariado", code: "C", color: "red" },
@@ -227,6 +262,9 @@ export default function Odontodiagrama({ onChange }) {
 
   const [teethState, setTeethState] = useState(initialTeethState);
   const [currentCondition, setCurrentCondition] = useState(dentalConditions[0]);
+  const [odontodiagramaSimplificado, setOdontodiagramaSimplificado] = useState(
+    {}
+  );
 
   const handleToothClick = (number, part) => {
     setTeethState((prevState) => {
@@ -253,7 +291,27 @@ export default function Odontodiagrama({ onChange }) {
         },
       };
 
-      onChange(updatedState);
+      // Actualizar odontodiagramaSimplificado
+      setOdontodiagramaSimplificado((prevOdonto) => {
+        const newOdonto = { ...prevOdonto };
+        if (newState.code) {
+          if (!newOdonto[number]) newOdonto[number] = {};
+          newOdonto[number][part] = newState.code;
+        } else {
+          if (newOdonto[number]) {
+            delete newOdonto[number][part];
+            if (Object.keys(newOdonto[number]).length === 0) {
+              delete newOdonto[number];
+            }
+          }
+        }
+
+        // Llamar a onChange después de actualizar el estado
+        setTimeout(() => onChange(updatedState, newOdonto), 0);
+
+        return newOdonto;
+      });
+
       return updatedState;
     });
   };
@@ -261,21 +319,19 @@ export default function Odontodiagrama({ onChange }) {
   // Función para generar el resumen activo
   const generateActiveSummary = () => {
     const summary = [];
-    Object.entries(teethState).forEach(([number, parts]) => {
-      Object.entries(parts).forEach(([part, state]) => {
-        if (state.code) {
-          const condition = dentalConditions.find((c) => c.code === state.code);
-          summary.push(
-            `Diente ${number} superficie ${translatePart(part)} ${
-              condition.name
-            }`
-          );
-        }
+    Object.entries(odontodiagramaSimplificado).forEach(([number, parts]) => {
+      Object.entries(parts).forEach(([part, code]) => {
+        const condition = dentalConditions.find((c) => c.code === code);
+        const toothName = toothNames[number] || `Diente ${number}`;
+        summary.push(
+          `${toothName} (${number}) superficie ${translatePart(part)} ${
+            condition.name
+          }`
+        );
       });
     });
     return summary;
   };
-
   const translatePart = (part) => {
     const translations = {
       top: "oclusal/incisal",
@@ -337,7 +393,7 @@ export default function Odontodiagrama({ onChange }) {
           />
         </svg>
       </div>
-     <div className="mt-4">
+      <div className="mt-4">
         <h4 className="text-md font-medium text-blue-900 mb-2">
           Resumen de Condiciones Actuales:
         </h4>

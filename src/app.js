@@ -6,7 +6,6 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3000;
 
-
 const pool = new Pool({
   user: "adempiere",
   host: "192.168.5.7",
@@ -28,7 +27,12 @@ app.get("/", (req, res) => {
 
 app.get("/api/paciente/:cedula", async (req, res) => {
   try {
-    const { cedula } = req.params;
+    let { cedula } = req.params;
+
+    // Si la cédula no comienza con 'V', añadimos la 'V'
+    if (!cedula.startsWith("V")) {
+      cedula = "V" + cedula;
+    }
     const query = `
       SELECT DISTINCT ON (ad.xx_admission)
         ad.dateordered::date AS "fecha",
@@ -50,7 +54,6 @@ app.get("/api/paciente/:cedula", async (req, res) => {
     `;
 
     const result = await pool.query(query, [cedula]);
-
     if (result.rows.length > 0) {
       res.json(result.rows);
     } else {
@@ -90,8 +93,8 @@ app.post("/api/historia-clinica", async (req, res) => {
 });
 
 // Ruta para manejar todas las demás solicitudes y servir index.html
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public', 'index.html'));
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
 // Iniciar el servidor

@@ -96,7 +96,7 @@ export default function HistoriaClinicaForm({
       observaciones: "",
     },
     odontodiagrama: {},
-    odontodiagramaLog: [],
+   
   });
 
   const handleInputChange = (e) => {
@@ -136,17 +136,19 @@ export default function HistoriaClinicaForm({
     });
   };
 
-   const handleOdontodiagramaChange = (newState, newLog) => {
+   const handleOdontodiagramaChange = (newState, simplifiedOdonto) => {
      setFormData((prevData) => ({
        ...prevData,
-       odontodiagrama: newState,
-       odontodiagramaLog: newLog,
+       odontodiagrama: simplifiedOdonto,
      }));
    };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(formData);
+    setFormData((currentFormData) => {
+      onSave(currentFormData);
+      return currentFormData;
+    });
   };
 
   return (
