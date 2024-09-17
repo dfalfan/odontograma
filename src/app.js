@@ -2,7 +2,6 @@ const express = require("express");
 const path = require("path");
 const { Pool } = require("pg");
 const cors = require("cors");
-
 const app = express();
 const port = process.env.PORT || 3000;
 
@@ -28,8 +27,6 @@ app.get("/", (req, res) => {
 app.get("/api/paciente/:cedula", async (req, res) => {
   try {
     let { cedula } = req.params;
-
-    // Si la cédula no comienza con 'V', añadimos la 'V'
     if (!cedula.startsWith("V")) {
       cedula = "V" + cedula;
     }
@@ -39,6 +36,7 @@ app.get("/api/paciente/:cedula", async (req, res) => {
         ad.xx_admission AS "admision",
         px.name AS "paciente",
         px.value AS "cedula",
+        px.c_bpartner_id AS "c_bpartner_id",
         px.birthday::date AS "nacimiento",
         pla.name AS "servicio",
         md.name AS "medico_linea",
@@ -52,7 +50,6 @@ app.get("/api/paciente/:cedula", async (req, res) => {
         AND px.value = $1
       ORDER BY ad.xx_admission DESC, ad.dateordered::date DESC
     `;
-
     const result = await pool.query(query, [cedula]);
     if (result.rows.length > 0) {
       res.json(result.rows);
@@ -66,25 +63,101 @@ app.get("/api/paciente/:cedula", async (req, res) => {
 });
 
 // Obtener Historia Clínica
-app.get("/api/historia-clinica/:pacienteId/:admisionId", async (req, res) => {
+app.get("/api/historia-clinica/:admisionId", async (req, res) => {
   try {
-    const { pacienteId, admisionId } = req.params;
-    // Aquí iría la lógica para obtener la historia clínica de la base de datos
-    // Por ahora, devolvemos un objeto vacío
-    res.json({});
+    const { admisionId } = req.params;
+    const query = `
+      SELECT * FROM xx_odonto
+      WHERE xx_admission = $1
+    `;
+    const result = await pool.query(query, [admisionId]);
+
+    if (result.rows.length > 0) {
+      res.json(result.rows[0]);
+    } else {
+      res.status(404).json({ message: "Historia clínica no encontrada" });
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Error al obtener la historia clínica" });
   }
 });
 
-// Guardar Historia Clínica
+// Guardar o Actualizar Historia Clínica
 app.post("/api/historia-clinica", async (req, res) => {
   try {
-    const historiaClinica = req.body;
-    // Aquí iría la lógica para guardar la historia clínica en la base de datos
-    // Por ahora, solo log y respuesta de éxito
-    console.log("Historia clínica recibida:", historiaClinica);
+    let {
+      xx_admission,
+      c_bpartner_id,
+      motivoConsulta,
+      enfermedadActual,
+      antecedentesPatologicosHereditarios,
+      alergias,
+      habitos,
+      antecedentesPersonalesPatologicos,
+      intervencionQuirurgica,
+      problemaHemorragia,
+      medicamentoActual,
+      alergiaLatex,
+      examenRadiografico,
+      odontodiagrama,
+    } = req.body;
+
+    // Asegúrate de que xx_admission y c_bpartner_id sean números
+    xx_admission = parseInt(xx_admission, 10);
+    c_bpartner_id = parseInt(c_bpartner_id, 10);
+
+    if (isNaN(xx_admission) || isNaN(c_bpartner_id)) {
+      throw new Error("xx_admission y c_bpartner_id deben ser números válidos");
+    }
+
+    console.log("Datos recibidos:", JSON.stringify(req.body, null, 2));
+
+    const query = `
+      INSERT INTO xx_odonto (
+        xx_admission, c_bpartner_id, motivo_consulta, enfermedad_actual,
+        antecedentes_patologicos_hereditarios, es_alergico, alergias, habitos,
+        antecedentes_personales_patologicos, intervencion_quirurgica,
+        problema_hemorragia, medicamento_actual, alergia_latex,
+        examen_radiografico, odontodiagrama
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+      ON CONFLICT (xx_admission) DO UPDATE SET
+        c_bpartner_id = EXCLUDED.c_bpartner_id,
+        motivo_consulta = EXCLUDED.motivo_consulta,
+        enfermedad_actual = EXCLUDED.enfermedad_actual,
+        antecedentes_patologicos_hereditarios = EXCLUDED.antecedentes_patologicos_hereditarios,
+        es_alergico = EXCLUDED.es_alergico,
+        alergias = EXCLUDED.alergias,
+        habitos = EXCLUDED.habitos,
+        antecedentes_personales_patologicos = EXCLUDED.antecedentes_personales_patologicos,
+        intervencion_quirurgica = EXCLUDED.intervencion_quirurgica,
+        problema_hemorragia = EXCLUDED.problema_hemorragia,
+        medicamento_actual = EXCLUDED.medicamento_actual,
+        alergia_latex = EXCLUDED.alergia_latex,
+        examen_radiografico = EXCLUDED.examen_radiografico,
+        odontodiagrama = EXCLUDED.odontodiagrama
+    `;
+
+    const result = await pool.query(query, [
+      xx_admission,
+      c_bpartner_id,
+      motivoConsulta,
+      enfermedadActual,
+      antecedentesPatologicosHereditarios,
+      alergias.esAlergico,
+      JSON.stringify(alergias),
+      JSON.stringify(habitos),
+      JSON.stringify(antecedentesPersonalesPatologicos),
+      JSON.stringify(intervencionQuirurgica),
+      problemaHemorragia,
+      JSON.stringify(medicamentoActual),
+      JSON.stringify(alergiaLatex),
+      JSON.stringify(examenRadiografico),
+      JSON.stringify(odontodiagrama),
+    ]);
+
+    console.log("Resultado de la consulta:", result);
+
     res.json({ message: "Historia clínica guardada con éxito" });
   } catch (err) {
     console.error(err);

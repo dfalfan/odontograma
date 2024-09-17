@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Odontodiagrama from "./Odontodiagrama";
 import {
   FaAllergies,
@@ -12,8 +12,11 @@ export default function HistoriaClinicaForm({
   pacienteId,
   admisionId,
   onSave,
+  selectedAdmision,
 }) {
   const [formData, setFormData] = useState({
+    xx_admission: admisionId,
+    c_bpartner_id: pacienteId,
     motivoConsulta: "",
     enfermedadActual: "",
     antecedentesPatologicosHereditarios: "",
@@ -105,40 +108,68 @@ export default function HistoriaClinicaForm({
     odontodiagrama: {},
   });
 
+  useEffect(() => {
+    if (selectedAdmision && selectedAdmision.historiaClinica) {
+      console.log(
+        "Datos recibidos en HistoriaClinicaForm:",
+        selectedAdmision.historiaClinica
+      );
+      setFormData((prevData) => ({
+        ...prevData,
+        xx_admission:
+          selectedAdmision.historiaClinica.xx_admission || admisionId,
+        c_bpartner_id:
+          selectedAdmision.historiaClinica.c_bpartner_id || pacienteId,
+        motivoConsulta: selectedAdmision.historiaClinica.motivo_consulta || "",
+        enfermedadActual:
+          selectedAdmision.historiaClinica.enfermedad_actual || "",
+        antecedentesPatologicosHereditarios:
+          selectedAdmision.historiaClinica
+            .antecedentes_patologicos_hereditarios || "",
+        alergias: {
+          esAlergico: selectedAdmision.historiaClinica.es_alergico || false,
+          tipos: selectedAdmision.historiaClinica.alergias?.tipos || {},
+          especifiqueOtros:
+            selectedAdmision.historiaClinica.alergias?.especifiqueOtros || "",
+        },
+        habitos: selectedAdmision.historiaClinica.habitos || {},
+        antecedentesPersonalesPatologicos:
+          selectedAdmision.historiaClinica
+            .antecedentes_personales_patologicos || {},
+        intervencionQuirurgica:
+          selectedAdmision.historiaClinica.intervencion_quirurgica || {},
+        problemaHemorragia:
+          selectedAdmision.historiaClinica.problema_hemorragia || false,
+        medicamentoActual:
+          selectedAdmision.historiaClinica.medicamento_actual || {},
+        alergiaLatex: selectedAdmision.historiaClinica.alergia_latex || {},
+        examenRadiografico:
+          selectedAdmision.historiaClinica.examen_radiografico || {},
+        odontodiagrama: selectedAdmision.historiaClinica.odontodiagrama || {},
+      }));
+    }
+  }, [selectedAdmision, admisionId, pacienteId]);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+    console.log(
+      `Campo cambiado: ${name}, Nuevo valor:`,
+      type === "checkbox" ? checked : value
+    );
+
     setFormData((prevState) => {
-      if (name.includes(".")) {
-        const [section, subsection, field] = name.split(".");
-        if (section === "alergias" && subsection === "esAlergico" && !checked) {
-          // Si se desmarca "¿Es alérgico a algún medicamento?", resetea todos los tipos
-          return {
-            ...prevState,
-            alergias: {
-              esAlergico: false,
-              tipos: Object.keys(prevState.alergias.tipos).reduce(
-                (acc, key) => ({ ...acc, [key]: false }),
-                {}
-              ),
-              especifiqueOtros: "",
-            },
-          };
-        }
-        return {
-          ...prevState,
-          [section]: {
-            ...prevState[section],
-            [subsection]:
-              subsection === "tipos"
-                ? { ...prevState[section][subsection], [field]: checked }
-                : checked,
-          },
-        };
+      const keys = name.split(".");
+      let newState = { ...prevState };
+      let current = newState;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        current[keys[i]] = { ...current[keys[i]] };
+        current = current[keys[i]];
       }
-      return {
-        ...prevState,
-        [name]: type === "checkbox" ? checked : value,
-      };
+
+      current[keys[keys.length - 1]] = type === "checkbox" ? checked : value;
+
+      return newState;
     });
   };
 
@@ -151,10 +182,12 @@ export default function HistoriaClinicaForm({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setFormData((currentFormData) => {
-      onSave(currentFormData);
-      return currentFormData;
-    });
+    const formDataToSend = {
+      ...formData,
+      xx_admission: parseInt(formData.xx_admission, 10),
+      c_bpartner_id: parseInt(formData.c_bpartner_id, 10),
+    };
+    onSave(formDataToSend);
   };
 
   return (
@@ -399,7 +432,10 @@ export default function HistoriaClinicaForm({
 
         {/* Odontodiagrama */}
         <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
-          <Odontodiagrama onChange={handleOdontodiagramaChange} />
+          <Odontodiagrama
+            onChange={handleOdontodiagramaChange}
+            initialData={formData.odontodiagrama || {}}
+          />
         </div>
       </div>
 

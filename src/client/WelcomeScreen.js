@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import HistoriaClinicaForm from "./HistoriaClinicaForm";
 
 export default function WelcomeScreen() {
@@ -30,8 +31,22 @@ export default function WelcomeScreen() {
     }
   };
 
-  const handleAdmisionSelect = (admision) => {
-    setSelectedAdmision(admision);
+  const handleAdmisionSelect = async (admision) => {
+    try {
+      console.log("Seleccionando admisión:", admision);
+      const response = await fetch(`/api/historia-clinica/${admision.admision}`);
+      if (response.ok) {
+        const historiaClinica = await response.json();
+        console.log("Historia clínica recibida:", historiaClinica);
+        setSelectedAdmision({ ...admision, historiaClinica });
+      } else {
+        console.log("No se encontró historia clínica, creando nueva");
+        setSelectedAdmision(admision);
+      }
+    } catch (error) {
+      console.error("Error al obtener la historia clínica:", error);
+      setError("Error al cargar la historia clínica. Por favor, intente de nuevo.");
+    }
   };
 
   const handleSaveHistoriaClinica = async (formData) => {
@@ -54,112 +69,115 @@ export default function WelcomeScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-8 animated-gradient">
-      <div className="max-w-6xl mx-auto">
-        <img
-          src="/images/minilogobn.png"
-          alt="Logo"
-          className="mx-auto mb-6 h-20"
-        />
-        <h1 className="text-4xl font-extrabold text-blue-600 mb-12 text-center text-shadow">
-          Sistema Odontológico
-        </h1>
-        <form onSubmit={handleSearch} className="mb-12">
-          <div className="flex shadow-lg rounded-lg overflow-hidden">
-            <input
-              type="text"
-              value={cedula}
-              onChange={(e) => setCedula(e.target.value)}
-              placeholder="Ingrese la cédula del paciente"
-              className="flex-grow px-6 py-4 text-lg focus:outline-none"
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-8 py-4 text-lg font-semibold transition duration-300 ease-in-out hover:bg-blue-700"
-            >
-              Buscar
-            </button>
-          </div>
-        </form>
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-8 flex flex-col items-center">
+      <img src="/images/minilogobn.png" alt="Logo" className="w-20 mb-4" />
+      <h1 className="text-4xl font-extrabold text-blue-600 mb-8 text-center">
+        Sistema Odontológico
+      </h1>
 
-        {error && (
-          <p className="text-red-600 text-center mb-8 font-medium">{error}</p>
-        )}
+      <form onSubmit={handleSearch} className="w-full max-w-lg mb-8">
+        <div className="flex shadow-lg rounded-lg overflow-hidden">
+          <input
+            type="text"
+            value={cedula}
+            onChange={(e) => setCedula(e.target.value)}
+            placeholder="Ingrese la cédula del paciente"
+            className="flex-grow px-4 py-2 text-lg focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-6 py-2 text-lg font-semibold transition duration-300 ease-in-out hover:bg-blue-700"
+          >
+            Buscar
+          </button>
+        </div>
+      </form>
 
+      {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+      <AnimatePresence>
         {paciente && (
-          <div className="bg-white rounded-xl shadow-xl p-8 mb-12 transition duration-300 ease-in-out hover:shadow-2xl">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">
-              Información del Paciente
-            </h2>
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              <p className="text-lg">
-                <span className="font-semibold text-gray-600">Nombre:</span>{" "}
-                {paciente.paciente}
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -50 }}
+            className="w-full max-w-2xl"
+          >
+            <div className="bg-white rounded-xl shadow-xl p-6 mb-6">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                Información del Paciente
+              </h2>
+              <p>
+                <strong>Nombre:</strong> {paciente.paciente}
               </p>
-              <p className="text-lg">
-                <span className="font-semibold text-gray-600">Cédula:</span>{" "}
-                {paciente.cedula}
+              <p>
+                <strong>Cédula:</strong> {paciente.cedula}
               </p>
-              <p className="text-lg">
-                <span className="font-semibold text-gray-600">
-                  Fecha de Nacimiento:
-                </span>{" "}
+              <p>
+                <strong>Fecha de Nacimiento:</strong>{" "}
                 {new Date(paciente.nacimiento).toLocaleDateString()}
               </p>
             </div>
 
-            <h3 className="text-2xl font-bold text-gray-800 mb-4">Estudios</h3>
-            <ul className="space-y-4">
-              {estudios.map((estudio, index) => (
-                <li
-                  key={index}
-                  className="bg-gray-50 rounded-lg p-4 shadow transition duration-300 ease-in-out hover:shadow-md"
-                >
-                  <div className="grid grid-cols-3 gap-4 mb-3">
+            <div className="bg-white rounded-xl shadow-xl p-6">
+              <h3 className="text-xl font-semibold mb-4">Estudios</h3>
+              <ul className="space-y-4">
+                {estudios.map((estudio, index) => (
+                  <motion.li
+                    key={index}
+                    initial={{ opacity: 0, x: -50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className="bg-gray-50 rounded-lg p-4 shadow"
+                  >
                     <p>
-                      <span className="font-semibold text-gray-600">
-                        Fecha:
-                      </span>{" "}
+                      <strong>Fecha:</strong>{" "}
                       {new Date(estudio.fecha).toLocaleDateString()}
                     </p>
                     <p>
-                      <span className="font-semibold text-gray-600">
-                        Servicio:
-                      </span>{" "}
-                      {estudio.servicio}
+                      <strong>Servicio:</strong> {estudio.servicio}
                     </p>
                     <p>
-                      <span className="font-semibold text-gray-600">
-                        Médico:
-                      </span>{" "}
-                      {estudio.medico_linea}
+                      <strong>Médico:</strong> {estudio.medico_linea}
                     </p>
-                  </div>
-                  <button
-                    onClick={() => handleAdmisionSelect(estudio)}
-                    className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold transition duration-300 ease-in-out hover:bg-blue-700"
-                  >
-                    Ver/Editar Historia Clínica
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+                    <button
+                      onClick={() => handleAdmisionSelect(estudio)}
+                      className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-md font-semibold transition duration-300 ease-in-out hover:bg-blue-700"
+                    >
+                      Ver/Editar Historia Clínica
+                    </button>
+                  </motion.li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
         )}
+      </AnimatePresence>
 
-        {selectedAdmision && (
-          <div className="bg-white rounded-xl shadow-xl p-8 transition duration-300 ease-in-out hover:shadow-2xl">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">
+      {selectedAdmision && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          className="mt-8 w-full max-w-4xl"
+        >
+          <div className="bg-white rounded-xl shadow-xl p-6">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Historia Clínica - Admisión {selectedAdmision.admision}
             </h2>
-            <HistoriaClinicaForm
-              pacienteId={paciente.cedula}
-              admisionId={selectedAdmision.admision}
-              onSave={handleSaveHistoriaClinica}
-            />
+            {selectedAdmision.historiaClinica ? (
+              <HistoriaClinicaForm
+                pacienteId={paciente.c_bpartner_id}
+                admisionId={selectedAdmision.admision}
+                onSave={handleSaveHistoriaClinica}
+                selectedAdmision={selectedAdmision}
+              />
+            ) : (
+              <p>Cargando historia clínica...</p>
+            )}
           </div>
-        )}
-      </div>
+        </motion.div>
+      )}
     </div>
   );
 }
