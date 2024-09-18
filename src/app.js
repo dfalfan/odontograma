@@ -101,6 +101,9 @@ app.post("/api/historia-clinica", async (req, res) => {
       alergiaLatex,
       examenRadiografico,
       odontodiagrama,
+      embarazo,
+      anticonceptivo,
+      reemplazoHormonal,
     } = req.body;
 
     // Asegúrate de que xx_admission y c_bpartner_id sean números
@@ -119,8 +122,8 @@ app.post("/api/historia-clinica", async (req, res) => {
         antecedentes_patologicos_hereditarios, es_alergico, alergias, habitos,
         antecedentes_personales_patologicos, intervencion_quirurgica,
         problema_hemorragia, medicamento_actual, alergia_latex,
-        examen_radiografico, odontodiagrama
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        examen_radiografico, odontodiagrama, embarazo, anticonceptivo, reemplazo_hormonal
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       ON CONFLICT (xx_admission) DO UPDATE SET
         c_bpartner_id = EXCLUDED.c_bpartner_id,
         motivo_consulta = EXCLUDED.motivo_consulta,
@@ -135,7 +138,10 @@ app.post("/api/historia-clinica", async (req, res) => {
         medicamento_actual = EXCLUDED.medicamento_actual,
         alergia_latex = EXCLUDED.alergia_latex,
         examen_radiografico = EXCLUDED.examen_radiografico,
-        odontodiagrama = EXCLUDED.odontodiagrama
+        odontodiagrama = EXCLUDED.odontodiagrama,
+        embarazo = EXCLUDED.embarazo,
+        anticonceptivo = EXCLUDED.anticonceptivo,
+        reemplazo_hormonal = EXCLUDED.reemplazo_hormonal
     `;
 
     const result = await pool.query(query, [
@@ -154,6 +160,9 @@ app.post("/api/historia-clinica", async (req, res) => {
       JSON.stringify(alergiaLatex),
       JSON.stringify(examenRadiografico),
       JSON.stringify(odontodiagrama),
+      JSON.stringify(embarazo),
+      JSON.stringify(anticonceptivo),
+      JSON.stringify(reemplazoHormonal),
     ]);
 
     console.log("Resultado de la consulta:", result);

@@ -6,6 +6,10 @@ import {
   FaSave,
   FaSmoking,
   FaNotesMedical,
+  FaCut,
+  FaTint,
+  FaPills,
+  FaBaby,
 } from "react-icons/fa";
 
 export default function HistoriaClinicaForm({
@@ -93,6 +97,18 @@ export default function HistoriaClinicaForm({
       esAlergico: false,
       especificaciones: "",
     },
+    embarazo: {
+      esta: false,
+      tiempoGestacion: "",
+    },
+    anticonceptivo: {
+      toma: false,
+      cual: "",
+    },
+    reemplazoHormonal: {
+      toma: false,
+      cual: "",
+    },
     examenRadiografico: {
       tipos: {
         periapical: false,
@@ -108,55 +124,179 @@ export default function HistoriaClinicaForm({
     odontodiagrama: {},
   });
 
-  useEffect(() => {
-    if (selectedAdmision && selectedAdmision.historiaClinica) {
+useEffect(() => {
+  if (selectedAdmision) {
+    const defaultFormData = {
+      xx_admission: admisionId,
+      c_bpartner_id: pacienteId,
+      motivoConsulta: "",
+      enfermedadActual: "",
+      antecedentesPatologicosHereditarios: "",
+      alergias: {
+        esAlergico: false,
+        tipos: {
+          antibioticos: false,
+          analgesicos: false,
+          anestesicos: false,
+          barbituricos: false,
+          yodo: false,
+          animales: false,
+          alimentos: false,
+          otros: false,
+        },
+        especifiqueOtros: "",
+      },
+      habitos: {
+        succionDedos: false,
+        usoProlongadoBiberones: false,
+        usoProlongadoChupones: false,
+        onicofagia: false,
+        queilofagia: false,
+        morderLapicesGanchos: false,
+        alcohol: false,
+        fumar: false,
+      },
+      antecedentesPersonalesPatologicos: {
+        hipertension: false,
+        hipotension: false,
+        tuberculosis: false,
+        diabetes: false,
+        hepatitis: false,
+        renales: false,
+        cancer: false,
+        gastricos: false,
+        endocrinos: false,
+        disnea: false,
+        epistaxis: false,
+        asma: false,
+        enfRespiratorias: false,
+        convulsiones: false,
+        epilepsia: false,
+        enfCardiaca: false,
+        inmunologicas: false,
+        vihSida: false,
+        congenitas: false,
+        drogadiccion: false,
+        amigdalitis: false,
+        respiradorBucal: false,
+        traumatismo: false,
+        fiebreReumatica: false,
+        anemia: false,
+        hemofilia: false,
+        herpes: false,
+        viasUrinarias: false,
+        venereas: false,
+        migrana: false,
+        sinusitis: false,
+        rinitisAlergica: false,
+        gripeFrecuente: false,
+        especificaciones: "",
+      },
+      intervencionQuirurgica: {
+        realizada: false,
+        especificaciones: "",
+      },
+      problemaHemorragia: false,
+      medicamentoActual: {
+        toma: false,
+        especificaciones: "",
+      },
+      alergiaLatex: {
+        esAlergico: false,
+        especificaciones: "",
+      },
+      embarazo: {
+        esta: false,
+        tiempoGestacion: "",
+      },
+      anticonceptivo: {
+        toma: false,
+        cual: "",
+      },
+      reemplazoHormonal: {
+        toma: false,
+        cual: "",
+      },
+      examenRadiografico: {
+        tipos: {
+          periapical: false,
+          interproximal: false,
+          oclusal: false,
+          panoramica: false,
+          cefalica: false,
+          otras: false,
+        },
+        especificaciones: "",
+        observaciones: "",
+      },
+      odontodiagrama: {},
+    };
+
+    if (selectedAdmision.historiaClinica) {
       console.log(
         "Datos recibidos en HistoriaClinicaForm:",
         selectedAdmision.historiaClinica
       );
-      setFormData((prevData) => ({
-        ...prevData,
+      setFormData({
+        ...defaultFormData,
+        ...selectedAdmision.historiaClinica,
         xx_admission:
           selectedAdmision.historiaClinica.xx_admission || admisionId,
         c_bpartner_id:
           selectedAdmision.historiaClinica.c_bpartner_id || pacienteId,
-        motivoConsulta: selectedAdmision.historiaClinica.motivo_consulta || "",
-        enfermedadActual:
-          selectedAdmision.historiaClinica.enfermedad_actual || "",
-        antecedentesPatologicosHereditarios:
-          selectedAdmision.historiaClinica
-            .antecedentes_patologicos_hereditarios || "",
         alergias: {
+          ...defaultFormData.alergias,
+          ...selectedAdmision.historiaClinica.alergias,
           esAlergico: selectedAdmision.historiaClinica.es_alergico || false,
-          tipos: selectedAdmision.historiaClinica.alergias?.tipos || {},
-          especifiqueOtros:
-            selectedAdmision.historiaClinica.alergias?.especifiqueOtros || "",
         },
-        habitos: selectedAdmision.historiaClinica.habitos || {},
-        antecedentesPersonalesPatologicos:
-          selectedAdmision.historiaClinica
-            .antecedentes_personales_patologicos || {},
-        intervencionQuirurgica:
-          selectedAdmision.historiaClinica.intervencion_quirurgica || {},
-        problemaHemorragia:
-          selectedAdmision.historiaClinica.problema_hemorragia || false,
-        medicamentoActual:
-          selectedAdmision.historiaClinica.medicamento_actual || {},
-        alergiaLatex: selectedAdmision.historiaClinica.alergia_latex || {},
-        examenRadiografico:
-          selectedAdmision.historiaClinica.examen_radiografico || {},
+        habitos: {
+          ...defaultFormData.habitos,
+          ...selectedAdmision.historiaClinica.habitos,
+        },
+        antecedentesPersonalesPatologicos: {
+          ...defaultFormData.antecedentesPersonalesPatologicos,
+          ...selectedAdmision.historiaClinica
+            .antecedentes_personales_patologicos,
+        },
+        intervencionQuirurgica: {
+          ...defaultFormData.intervencionQuirurgica,
+          ...selectedAdmision.historiaClinica.intervencion_quirurgica,
+        },
+        medicamentoActual: {
+          ...defaultFormData.medicamentoActual,
+          ...selectedAdmision.historiaClinica.medicamento_actual,
+        },
+        alergiaLatex: {
+          ...defaultFormData.alergiaLatex,
+          ...selectedAdmision.historiaClinica.alergia_latex,
+        },
+        embarazo: {
+          ...defaultFormData.embarazo,
+          ...selectedAdmision.historiaClinica.embarazo,
+        },
+        anticonceptivo: {
+          ...defaultFormData.anticonceptivo,
+          ...selectedAdmision.historiaClinica.anticonceptivo,
+        },
+        reemplazoHormonal: {
+          ...defaultFormData.reemplazoHormonal,
+          ...selectedAdmision.historiaClinica.reemplazo_hormonal,
+        },
+        examenRadiografico: {
+          ...defaultFormData.examenRadiografico,
+          ...selectedAdmision.historiaClinica.examen_radiografico,
+        },
         odontodiagrama: selectedAdmision.historiaClinica.odontodiagrama || {},
-      }));
+      });
+    } else {
+      setFormData(defaultFormData);
     }
-  }, [selectedAdmision, admisionId, pacienteId]);
+  }
+}, [selectedAdmision, admisionId, pacienteId]);
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    console.log(
-      `Campo cambiado: ${name}, Nuevo valor:`,
-      type === "checkbox" ? checked : value
-    );
-
     setFormData((prevState) => {
       const keys = name.split(".");
       let newState = { ...prevState };
@@ -376,6 +516,199 @@ export default function HistoriaClinicaForm({
           </div>
         </div>
 
+        {/* Sección: Intervención Quirúrgica */}
+        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <FaCut className="mr-2 text-red-500" />
+            Intervención Quirúrgica
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="intervencionQuirurgica"
+                name="intervencionQuirurgica.realizada"
+                checked={formData.intervencionQuirurgica.realizada}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <label htmlFor="intervencionQuirurgica">
+                ¿Ha sido sometido a alguna intervención quirúrgica?
+              </label>
+            </div>
+            {formData.intervencionQuirurgica.realizada && (
+              <textarea
+                name="intervencionQuirurgica.especificaciones"
+                value={formData.intervencionQuirurgica.especificaciones}
+                onChange={handleInputChange}
+                placeholder="Especifique"
+                className="w-full p-2 border rounded"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Sección: Problema de Hemorragia */}
+        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <FaTint className="mr-2 text-red-500" />
+            Problema de Hemorragia
+          </h3>
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="problemaHemorragia"
+              name="problemaHemorragia"
+              checked={formData.problemaHemorragia}
+              onChange={handleInputChange}
+              className="mr-2"
+            />
+            <label htmlFor="problemaHemorragia">
+              ¿Ha tenido algún problema de hemorragia después de la cirugía?
+            </label>
+          </div>
+        </div>
+
+        {/* Sección: Medicamento Actual */}
+        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <FaPills className="mr-2 text-blue-500" />
+            Medicamento Actual
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="medicamentoActual"
+                name="medicamentoActual.toma"
+                checked={formData.medicamentoActual.toma}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <label htmlFor="medicamentoActual">
+                ¿Está tomando actualmente algún medicamento?
+              </label>
+            </div>
+            {formData.medicamentoActual.toma && (
+              <textarea
+                name="medicamentoActual.especificaciones"
+                value={formData.medicamentoActual.especificaciones}
+                onChange={handleInputChange}
+                placeholder="Especifique"
+                className="w-full p-2 border rounded"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Sección: Alergia al Látex */}
+        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <FaAllergies className="mr-2 text-yellow-500" />
+            Alergia al Látex
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="alergiaLatex"
+                name="alergiaLatex.esAlergico"
+                checked={formData.alergiaLatex.esAlergico}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <label htmlFor="alergiaLatex">
+                ¿Es alérgico al látex o algún otro material?
+              </label>
+            </div>
+            {formData.alergiaLatex.esAlergico && (
+              <textarea
+                name="alergiaLatex.especificaciones"
+                value={formData.alergiaLatex.especificaciones}
+                onChange={handleInputChange}
+                placeholder="Especifique"
+                className="w-full p-2 border rounded"
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Sección: Embarazo y Anticonceptivos */}
+        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <FaBaby className="mr-2 text-pink-500" />
+            Embarazo y Anticonceptivos
+          </h3>
+          <div className="space-y-4">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="embarazo"
+                name="embarazo.esta"
+                checked={formData.embarazo.esta}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <label htmlFor="embarazo">¿Está embarazada?</label>
+            </div>
+            {formData.embarazo.esta && (
+              <input
+                type="text"
+                name="embarazo.tiempoGestacion"
+                value={formData.embarazo.tiempoGestacion}
+                onChange={handleInputChange}
+                placeholder="Tiempo de gestación"
+                className="w-full p-2 border rounded"
+              />
+            )}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="anticonceptivo"
+                name="anticonceptivo.toma"
+                checked={formData.anticonceptivo.toma}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <label htmlFor="anticonceptivo">
+                ¿Está tomando algún anticonceptivo?
+              </label>
+            </div>
+            {formData.anticonceptivo.toma && (
+              <input
+                type="text"
+                name="anticonceptivo.cual"
+                value={formData.anticonceptivo.cual}
+                onChange={handleInputChange}
+                placeholder="¿Cuál?"
+                className="w-full p-2 border rounded"
+              />
+            )}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="reemplazoHormonal"
+                name="reemplazoHormonal.toma"
+                checked={formData.reemplazoHormonal.toma}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <label htmlFor="reemplazoHormonal">
+                ¿Está tomando algún reemplazo hormonal?
+              </label>
+            </div>
+            {formData.reemplazoHormonal.toma && (
+              <input
+                type="text"
+                name="reemplazoHormonal.cual"
+                value={formData.reemplazoHormonal.cual}
+                onChange={handleInputChange}
+                placeholder="¿Cuál?"
+                className="w-full p-2 border rounded"
+              />
+            )}
+          </div>
+        </div>
         {/* Sección: Examen Radiográfico */}
         <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
           <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">

@@ -267,63 +267,49 @@ const dentalConditions = [
   { name: "Hipoplasia de esmalte", code: "Hp", color: "blue" },
 ];
 
-function Odontodiagrama({ onChange, initialData = {} }) {
-  const [teethState, setTeethState] = useState(() => {
-    const initialTeethState = Object.fromEntries(
-      [...Array(89).keys()].map((n) => [
-        n,
-        {
-          top: { color: "white", code: "" },
-          left: { color: "white", code: "" },
-          bottom: { color: "white", code: "" },
-          right: { color: "white", code: "" },
-          center: { color: "white", code: "" },
-        },
-      ])
-    );
+function initializeTeethState(initialData = {}) {
+  const initialTeethState = Object.fromEntries(
+    [...Array(89).keys()].map((n) => [
+      n,
+      {
+        top: { color: "white", code: "" },
+        left: { color: "white", code: "" },
+        bottom: { color: "white", code: "" },
+        right: { color: "white", code: "" },
+        center: { color: "white", code: "" },
+      },
+    ])
+  );
 
-    // Combinar los datos iniciales con el estado inicial
-    Object.entries(initialData).forEach(([tooth, parts]) => {
-      Object.entries(parts).forEach(([part, code]) => {
-        const condition = dentalConditions.find((c) => c.code === code);
-        if (condition) {
-          initialTeethState[tooth][part] = {
-            color: condition.color,
-            code: condition.code,
-          };
-        }
-      });
+  // Combinar los datos iniciales con el estado inicial
+  Object.entries(initialData).forEach(([tooth, parts]) => {
+    Object.entries(parts).forEach(([part, code]) => {
+      const condition = dentalConditions.find((c) => c.code === code);
+      if (condition) {
+        initialTeethState[tooth][part] = {
+          color: condition.color,
+          code: condition.code,
+        };
+      }
     });
-
-    return initialTeethState;
   });
 
-  const [currentCondition, setCurrentCondition] = useState(dentalConditions[0]);
-  const [odontodiagramaSimplificado, setOdontodiagramaSimplificado] = useState(
-    initialData || {}
+  return initialTeethState;
+}
+
+
+function Odontodiagrama({ onChange, initialData = {} }) {
+  const [teethState, setTeethState] = useState(() =>
+    initializeTeethState(initialData)
   );
+  const [currentCondition, setCurrentCondition] = useState(dentalConditions[0]);
+  const [odontodiagramaSimplificado, setOdontodiagramaSimplificado] =
+    useState(initialData);
 
   useEffect(() => {
     console.log("Datos iniciales del odontograma:", initialData);
-    // Actualizar el estado cuando cambien los datos iniciales
-    if (initialData) {
-      setTeethState((prevState) => {
-        const newState = { ...prevState };
-        Object.entries(initialData).forEach(([tooth, parts]) => {
-          Object.entries(parts).forEach(([part, code]) => {
-            const condition = dentalConditions.find((c) => c.code === code);
-            if (condition) {
-              newState[tooth][part] = {
-                color: condition.color,
-                code: condition.code,
-              };
-            }
-          });
-        });
-        return newState;
-      });
-      setOdontodiagramaSimplificado(initialData);
-    }
+    setTeethState(initializeTeethState(initialData));
+    setOdontodiagramaSimplificado(initialData);
   }, [initialData]);
 
   const handleToothClick = (number, part) => {

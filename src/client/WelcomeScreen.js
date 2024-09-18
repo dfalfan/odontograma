@@ -31,23 +31,29 @@ export default function WelcomeScreen() {
     }
   };
 
-  const handleAdmisionSelect = async (admision) => {
-    try {
-      console.log("Seleccionando admisión:", admision);
-      const response = await fetch(`/api/historia-clinica/${admision.admision}`);
-      if (response.ok) {
-        const historiaClinica = await response.json();
-        console.log("Historia clínica recibida:", historiaClinica);
-        setSelectedAdmision({ ...admision, historiaClinica });
-      } else {
-        console.log("No se encontró historia clínica, creando nueva");
-        setSelectedAdmision(admision);
-      }
-    } catch (error) {
-      console.error("Error al obtener la historia clínica:", error);
-      setError("Error al cargar la historia clínica. Por favor, intente de nuevo.");
-    }
-  };
+ const handleAdmisionSelect = async (admision) => {
+   try {
+     const response = await fetch(`/api/historia-clinica/${admision.admision}`);
+     if (response.ok) {
+       const historiaClinica = await response.json();
+       setSelectedAdmision({ ...admision, historiaClinica });
+     } else if (response.status === 404) {
+       // Si no se encuentra la historia clínica, creamos una nueva
+       setSelectedAdmision({
+         ...admision,
+         historiaClinica: null, // Indicamos que es una nueva historia clínica
+       });
+     } else {
+       throw new Error("Error al cargar la historia clínica");
+     }
+   } catch (error) {
+     console.error("Error al obtener la historia clínica:", error);
+     setError(
+       "Error al cargar la historia clínica. Por favor, intente de nuevo."
+     );
+   }
+ };
+
 
   const handleSaveHistoriaClinica = async (formData) => {
     try {
@@ -72,7 +78,7 @@ export default function WelcomeScreen() {
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-8 flex flex-col items-center">
       <img src="/images/minilogobn.png" alt="Logo" className="w-20 mb-4" />
       <h1 className="text-4xl font-extrabold text-blue-600 mb-8 text-center">
-        Sistema Odontológico
+        Historia Clínica Odontológica
       </h1>
 
       <form onSubmit={handleSearch} className="w-full max-w-lg mb-8">
@@ -165,16 +171,12 @@ export default function WelcomeScreen() {
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
               Historia Clínica - Admisión {selectedAdmision.admision}
             </h2>
-            {selectedAdmision.historiaClinica ? (
-              <HistoriaClinicaForm
-                pacienteId={paciente.c_bpartner_id}
-                admisionId={selectedAdmision.admision}
-                onSave={handleSaveHistoriaClinica}
-                selectedAdmision={selectedAdmision}
-              />
-            ) : (
-              <p>Cargando historia clínica...</p>
-            )}
+            <HistoriaClinicaForm
+              pacienteId={paciente.c_bpartner_id}
+              admisionId={selectedAdmision.admision}
+              onSave={handleSaveHistoriaClinica}
+              selectedAdmision={selectedAdmision}
+            />
           </div>
         </motion.div>
       )}
