@@ -19,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
 
+
 // Rutas
 app.get("/", (req, res) => {
   res.send("Bienvenido a la aplicación Odontograma");
@@ -166,6 +167,7 @@ app.post("/api/historia-clinica", async (req, res) => {
     ]);
 
     console.log("Resultado de la consulta:", result);
+    
 
     res.json({ message: "Historia clínica guardada con éxito" });
   } catch (err) {

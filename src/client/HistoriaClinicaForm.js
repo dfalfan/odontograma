@@ -244,6 +244,9 @@ useEffect(() => {
           selectedAdmision.historiaClinica.xx_admission || admisionId,
         c_bpartner_id:
           selectedAdmision.historiaClinica.c_bpartner_id || pacienteId,
+        motivoConsulta: selectedAdmision.historiaClinica.motivo_consulta || "",
+        enfermedadActual: selectedAdmision.historiaClinica.enfermedad_actual || "",
+        antecedentesPatologicosHereditarios: selectedAdmision.historiaClinica.antecedentes_patologicos_hereditarios || "",
         alergias: {
           ...defaultFormData.alergias,
           ...selectedAdmision.historiaClinica.alergias,
