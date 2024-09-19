@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+
 
 const ToothPart = ({ d, fill, onClick }) => (
-  <path d={d} fill={fill} stroke="black" strokeWidth="0.5" onClick={onClick} />
+  <motion.path
+    d={d}
+    fill={fill}
+    stroke="black"
+    strokeWidth="0.5"
+    onClick={onClick}
+    whileHover={{ scale: 1.6 }}
+    whileTap={{ scale: 0.9 }}
+  />
 );
+
 
 const Tooth = ({ number, parts, onClick }) => {
   const size = 30;
@@ -410,9 +421,11 @@ function Odontodiagrama({ onChange, initialData = {} }) {
       <h3 className="text-lg font-medium text-blue-900 mb-4">Odontodiagrama</h3>
       <div className="mb-4 flex flex-wrap gap-2">
         {dentalConditions.map((condition) => (
-          <button
+          <motion.button
             key={condition.code}
             onClick={() => setCurrentCondition(condition)}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             className={`px-3 py-1 rounded-md text-sm transition-colors ${
               currentCondition.code === condition.code
                 ? `bg-${condition.color}-600 text-white`
@@ -420,7 +433,7 @@ function Odontodiagrama({ onChange, initialData = {} }) {
             }`}
           >
             {condition.name}
-          </button>
+          </motion.button>
         ))}
       </div>
       <div className="bg-gray-50 p-4 rounded-lg mb-4">
