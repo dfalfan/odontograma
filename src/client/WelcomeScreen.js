@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import HistoriaClinicaForm from "./HistoriaClinicaForm";
+import { FaLock } from "react-icons/fa";
 
 export default function WelcomeScreen() {
   const [cedula, setCedula] = useState("");
@@ -31,28 +32,29 @@ export default function WelcomeScreen() {
     }
   };
 
- const handleAdmisionSelect = async (admision) => {
-   try {
-     const response = await fetch(`/api/historia-clinica/${admision.admision}`);
-     if (response.ok) {
-       const historiaClinica = await response.json();
-       setSelectedAdmision({ ...admision, historiaClinica });
-     } else if (response.status === 404) {
-       setSelectedAdmision({
-         ...admision,
-         historiaClinica: null, // Indicamos que es una nueva historia clínica
-       });
-     } else {
-       throw new Error("Error al cargar la historia clínica");
-     }
-   } catch (error) {
-     console.error("Error al obtener la historia clínica:", error);
-     setError(
-       "Error al cargar la historia clínica. Por favor, intente de nuevo."
-     );
-   }
- };
-
+  const handleAdmisionSelect = async (admision) => {
+    try {
+      const response = await fetch(
+        `/api/historia-clinica/${admision.admision}`
+      );
+      if (response.ok) {
+        const historiaClinica = await response.json();
+        setSelectedAdmision({ ...admision, historiaClinica });
+      } else if (response.status === 404) {
+        setSelectedAdmision({
+          ...admision,
+          historiaClinica: null,
+        });
+      } else {
+        throw new Error("Error al cargar la historia clínica");
+      }
+    } catch (error) {
+      console.error("Error al obtener la historia clínica:", error);
+      setError(
+        "Error al cargar la historia clínica. Por favor, intente de nuevo."
+      );
+    }
+  };
 
   const handleSaveHistoriaClinica = async (formData) => {
     try {
@@ -67,6 +69,11 @@ export default function WelcomeScreen() {
         throw new Error("Error al guardar la historia clínica");
       }
       console.log("Historia clínica guardada con éxito");
+      // Actualizar el estado local después de guardar
+      setSelectedAdmision((prevState) => ({
+        ...prevState,
+        historiaClinica: formData,
+      }));
     } catch (error) {
       console.error("Error al guardar la historia clínica:", error);
       setError("Error al guardar la historia clínica");
@@ -190,21 +197,31 @@ export default function WelcomeScreen() {
                         selectedAdmision.admision === estudio.admision
                           ? "border-2 border-blue-500 ring-2 ring-blue-300"
                           : "hover:bg-gray-100"
-                      }`}
+                      } ${estudio.admision_cerrada ? "bg-gray-200" : ""}`}
                     >
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        <p>
-                          <strong className="font-semibold">Fecha:</strong>{" "}
-                          {new Date(estudio.fecha).toLocaleDateString()}
-                        </p>
-                        <p>
-                          <strong className="font-semibold">Servicio:</strong>{" "}
-                          {estudio.servicio}
-                        </p>
-                        <p>
-                          <strong className="font-semibold">Médico:</strong>{" "}
-                          {estudio.medico_linea}
-                        </p>
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <p>
+                            <strong className="font-semibold">Fecha:</strong>{" "}
+                            {new Date(estudio.fecha).toLocaleDateString()}
+                          </p>
+                          <p>
+                            <strong className="font-semibold">Servicio:</strong>{" "}
+                            {estudio.servicio}
+                          </p>
+                          <p>
+                            <strong className="font-semibold">Médico:</strong>{" "}
+                            {estudio.medico_linea}
+                          </p>
+                        </div>
+                        {estudio.admision_cerrada && (
+                          <div className="flex items-center text-red-600">
+                            <FaLock className="mr-1" />
+                            <span className="text-sm font-semibold">
+                              Cerrada
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <button
                         onClick={() => handleAdmisionSelect(estudio)}
@@ -212,13 +229,15 @@ export default function WelcomeScreen() {
                           selectedAdmision &&
                           selectedAdmision.admision === estudio.admision
                             ? "bg-blue-600 text-white hover:bg-blue-700"
+                            : estudio.admision_cerrada
+                            ? "bg-gray-400 text-white"
                             : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                         }`}
                       >
                         {selectedAdmision &&
                         selectedAdmision.admision === estudio.admision
                           ? "Seleccionado"
-                          : "Ver/Editar Historia Clínica"}
+                          : "Ver Historia Clínica"}
                       </button>
                     </motion.li>
                   ))}
@@ -227,6 +246,7 @@ export default function WelcomeScreen() {
             </motion.div>
           )}
         </AnimatePresence>
+
         <AnimatePresence>
           {selectedAdmision && (
             <motion.div
@@ -253,12 +273,18 @@ export default function WelcomeScreen() {
                   <span className="font-semibold">Admisión:</span>{" "}
                   {selectedAdmision.admision}
                 </p>
+                {selectedAdmision.admision_cerrada && (
+                  <p className="text-sm mt-2 font-bold">
+                    Esta admisión está cerrada y no puede ser editada.
+                  </p>
+                )}
               </div>
               <HistoriaClinicaForm
                 pacienteId={paciente.c_bpartner_id}
                 admisionId={selectedAdmision.admision}
                 onSave={handleSaveHistoriaClinica}
                 selectedAdmision={selectedAdmision}
+                readOnly={selectedAdmision.admision_cerrada}
               />
             </motion.div>
           )}

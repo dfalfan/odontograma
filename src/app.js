@@ -40,12 +40,14 @@ app.get("/api/paciente/:cedula", async (req, res) => {
         px.birthday::date AS "nacimiento",
         pla.name AS "servicio",
         md.name AS "medico_linea",
-        ad.xx_sede AS "sede"
+        ad.xx_sede AS "sede",
+        COALESCE(o.admision_cerrada, false) AS "admision_cerrada"
       FROM c_order AS ad
       INNER JOIN c_bpartner AS px ON px.c_bpartner_id = ad.c_bpartner_id
       INNER JOIN c_orderline AS lad ON lad.c_order_id = ad.c_order_id
       INNER JOIN m_product AS pla ON pla.m_product_id = lad.m_product_id
       INNER JOIN c_bpartner AS md ON md.c_bpartner_id = lad.xx_vendor_id
+      LEFT JOIN xx_odonto AS o ON o.xx_admission = ad.xx_admission
       WHERE ad.xx_services IN (1044558, 1050864)
         AND px.value = $1
       ORDER BY ad.xx_admission DESC, ad.dateordered::date DESC
