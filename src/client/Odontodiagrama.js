@@ -9,7 +9,7 @@ const ToothPart = ({ d, fill, onClick }) => (
     stroke="black"
     strokeWidth="0.5"
     onClick={onClick}
-    whileHover={{ scale: 1.6 }}
+    whileHover={{ scale: 1.1 }}
     whileTap={{ scale: 0.9 }}
   />
 );

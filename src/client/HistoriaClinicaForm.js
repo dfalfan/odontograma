@@ -10,6 +10,9 @@ import {
   FaTint,
   FaPills,
   FaBaby,
+  FaComments,
+  FaStethoscope,
+  FaLock,
 } from "react-icons/fa";
 
 export default function HistoriaClinicaForm({
@@ -122,181 +125,193 @@ export default function HistoriaClinicaForm({
       observaciones: "",
     },
     odontodiagrama: {},
+    observaciones: "",
+    diagnostico: "",
+    admision_cerrada: false,
   });
 
-useEffect(() => {
-  if (selectedAdmision) {
-    const defaultFormData = {
-      xx_admission: admisionId,
-      c_bpartner_id: pacienteId,
-      motivoConsulta: "",
-      enfermedadActual: "",
-      antecedentesPatologicosHereditarios: "",
-      alergias: {
-        esAlergico: false,
-        tipos: {
-          antibioticos: false,
-          analgesicos: false,
-          anestesicos: false,
-          barbituricos: false,
-          yodo: false,
-          animales: false,
-          alimentos: false,
-          otros: false,
-        },
-        especifiqueOtros: "",
-      },
-      habitos: {
-        succionDedos: false,
-        usoProlongadoBiberones: false,
-        usoProlongadoChupones: false,
-        onicofagia: false,
-        queilofagia: false,
-        morderLapicesGanchos: false,
-        alcohol: false,
-        fumar: false,
-      },
-      antecedentesPersonalesPatologicos: {
-        hipertension: false,
-        hipotension: false,
-        tuberculosis: false,
-        diabetes: false,
-        hepatitis: false,
-        renales: false,
-        cancer: false,
-        gastricos: false,
-        endocrinos: false,
-        disnea: false,
-        epistaxis: false,
-        asma: false,
-        enfRespiratorias: false,
-        convulsiones: false,
-        epilepsia: false,
-        enfCardiaca: false,
-        inmunologicas: false,
-        vihSida: false,
-        congenitas: false,
-        drogadiccion: false,
-        amigdalitis: false,
-        respiradorBucal: false,
-        traumatismo: false,
-        fiebreReumatica: false,
-        anemia: false,
-        hemofilia: false,
-        herpes: false,
-        viasUrinarias: false,
-        venereas: false,
-        migrana: false,
-        sinusitis: false,
-        rinitisAlergica: false,
-        gripeFrecuente: false,
-        especificaciones: "",
-      },
-      intervencionQuirurgica: {
-        realizada: false,
-        especificaciones: "",
-      },
-      problemaHemorragia: false,
-      medicamentoActual: {
-        toma: false,
-        especificaciones: "",
-      },
-      alergiaLatex: {
-        esAlergico: false,
-        especificaciones: "",
-      },
-      embarazo: {
-        esta: false,
-        tiempoGestacion: "",
-      },
-      anticonceptivo: {
-        toma: false,
-        cual: "",
-      },
-      reemplazoHormonal: {
-        toma: false,
-        cual: "",
-      },
-      examenRadiografico: {
-        tipos: {
-          periapical: false,
-          interproximal: false,
-          oclusal: false,
-          panoramica: false,
-          cefalica: false,
-          otras: false,
-        },
-        especificaciones: "",
-        observaciones: "",
-      },
-      odontodiagrama: {},
-    };
-
-    if (selectedAdmision.historiaClinica) {
-      console.log(
-        "Datos recibidos en HistoriaClinicaForm:",
-        selectedAdmision.historiaClinica
-      );
-      setFormData({
-        ...defaultFormData,
-        ...selectedAdmision.historiaClinica,
-        xx_admission:
-          selectedAdmision.historiaClinica.xx_admission || admisionId,
-        c_bpartner_id:
-          selectedAdmision.historiaClinica.c_bpartner_id || pacienteId,
-        motivoConsulta: selectedAdmision.historiaClinica.motivo_consulta || "",
-        enfermedadActual: selectedAdmision.historiaClinica.enfermedad_actual || "",
-        antecedentesPatologicosHereditarios: selectedAdmision.historiaClinica.antecedentes_patologicos_hereditarios || "",
+  useEffect(() => {
+    if (selectedAdmision) {
+      const defaultFormData = {
+        xx_admission: admisionId,
+        c_bpartner_id: pacienteId,
+        motivoConsulta: "",
+        enfermedadActual: "",
+        antecedentesPatologicosHereditarios: "",
         alergias: {
-          ...defaultFormData.alergias,
-          ...selectedAdmision.historiaClinica.alergias,
-          esAlergico: selectedAdmision.historiaClinica.es_alergico || false,
+          esAlergico: false,
+          tipos: {
+            antibioticos: false,
+            analgesicos: false,
+            anestesicos: false,
+            barbituricos: false,
+            yodo: false,
+            animales: false,
+            alimentos: false,
+            otros: false,
+          },
+          especifiqueOtros: "",
         },
         habitos: {
-          ...defaultFormData.habitos,
-          ...selectedAdmision.historiaClinica.habitos,
+          succionDedos: false,
+          usoProlongadoBiberones: false,
+          usoProlongadoChupones: false,
+          onicofagia: false,
+          queilofagia: false,
+          morderLapicesGanchos: false,
+          alcohol: false,
+          fumar: false,
         },
         antecedentesPersonalesPatologicos: {
-          ...defaultFormData.antecedentesPersonalesPatologicos,
-          ...selectedAdmision.historiaClinica
-            .antecedentes_personales_patologicos,
+          hipertension: false,
+          hipotension: false,
+          tuberculosis: false,
+          diabetes: false,
+          hepatitis: false,
+          renales: false,
+          cancer: false,
+          gastricos: false,
+          endocrinos: false,
+          disnea: false,
+          epistaxis: false,
+          asma: false,
+          enfRespiratorias: false,
+          convulsiones: false,
+          epilepsia: false,
+          enfCardiaca: false,
+          inmunologicas: false,
+          vihSida: false,
+          congenitas: false,
+          drogadiccion: false,
+          amigdalitis: false,
+          respiradorBucal: false,
+          traumatismo: false,
+          fiebreReumatica: false,
+          anemia: false,
+          hemofilia: false,
+          herpes: false,
+          viasUrinarias: false,
+          venereas: false,
+          migrana: false,
+          sinusitis: false,
+          rinitisAlergica: false,
+          gripeFrecuente: false,
+          especificaciones: "",
         },
         intervencionQuirurgica: {
-          ...defaultFormData.intervencionQuirurgica,
-          ...selectedAdmision.historiaClinica.intervencion_quirurgica,
+          realizada: false,
+          especificaciones: "",
         },
+        problemaHemorragia: false,
         medicamentoActual: {
-          ...defaultFormData.medicamentoActual,
-          ...selectedAdmision.historiaClinica.medicamento_actual,
+          toma: false,
+          especificaciones: "",
         },
         alergiaLatex: {
-          ...defaultFormData.alergiaLatex,
-          ...selectedAdmision.historiaClinica.alergia_latex,
+          esAlergico: false,
+          especificaciones: "",
         },
         embarazo: {
-          ...defaultFormData.embarazo,
-          ...selectedAdmision.historiaClinica.embarazo,
+          esta: false,
+          tiempoGestacion: "",
         },
         anticonceptivo: {
-          ...defaultFormData.anticonceptivo,
-          ...selectedAdmision.historiaClinica.anticonceptivo,
+          toma: false,
+          cual: "",
         },
         reemplazoHormonal: {
-          ...defaultFormData.reemplazoHormonal,
-          ...selectedAdmision.historiaClinica.reemplazo_hormonal,
+          toma: false,
+          cual: "",
         },
         examenRadiografico: {
-          ...defaultFormData.examenRadiografico,
-          ...selectedAdmision.historiaClinica.examen_radiografico,
+          tipos: {
+            periapical: false,
+            interproximal: false,
+            oclusal: false,
+            panoramica: false,
+            cefalica: false,
+            otras: false,
+          },
+          especificaciones: "",
+          observaciones: "",
         },
-        odontodiagrama: selectedAdmision.historiaClinica.odontodiagrama || {},
-      });
-    } else {
-      setFormData(defaultFormData);
-    }
-  }
-}, [selectedAdmision, admisionId, pacienteId]);
+        odontodiagrama: {},
+        observaciones: "",
+        diagnostico: "",
+      };
 
+      if (selectedAdmision.historiaClinica) {
+        console.log(
+          "Datos recibidos en HistoriaClinicaForm:",
+          selectedAdmision.historiaClinica
+        );
+        setFormData({
+          ...defaultFormData,
+          ...selectedAdmision.historiaClinica,
+          xx_admission:
+            selectedAdmision.historiaClinica.xx_admission || admisionId,
+          c_bpartner_id:
+            selectedAdmision.historiaClinica.c_bpartner_id || pacienteId,
+          motivoConsulta:
+            selectedAdmision.historiaClinica.motivo_consulta || "",
+          enfermedadActual:
+            selectedAdmision.historiaClinica.enfermedad_actual || "",
+          antecedentesPatologicosHereditarios:
+            selectedAdmision.historiaClinica
+              .antecedentes_patologicos_hereditarios || "",
+          alergias: {
+            ...defaultFormData.alergias,
+            ...selectedAdmision.historiaClinica.alergias,
+            esAlergico: selectedAdmision.historiaClinica.es_alergico || false,
+          },
+          habitos: {
+            ...defaultFormData.habitos,
+            ...selectedAdmision.historiaClinica.habitos,
+          },
+          antecedentesPersonalesPatologicos: {
+            ...defaultFormData.antecedentesPersonalesPatologicos,
+            ...selectedAdmision.historiaClinica
+              .antecedentes_personales_patologicos,
+          },
+          intervencionQuirurgica: {
+            ...defaultFormData.intervencionQuirurgica,
+            ...selectedAdmision.historiaClinica.intervencion_quirurgica,
+          },
+          medicamentoActual: {
+            ...defaultFormData.medicamentoActual,
+            ...selectedAdmision.historiaClinica.medicamento_actual,
+          },
+          alergiaLatex: {
+            ...defaultFormData.alergiaLatex,
+            ...selectedAdmision.historiaClinica.alergia_latex,
+          },
+          embarazo: {
+            ...defaultFormData.embarazo,
+            ...selectedAdmision.historiaClinica.embarazo,
+          },
+          anticonceptivo: {
+            ...defaultFormData.anticonceptivo,
+            ...selectedAdmision.historiaClinica.anticonceptivo,
+          },
+          reemplazoHormonal: {
+            ...defaultFormData.reemplazoHormonal,
+            ...selectedAdmision.historiaClinica.reemplazo_hormonal,
+          },
+          examenRadiografico: {
+            ...defaultFormData.examenRadiografico,
+            ...selectedAdmision.historiaClinica.examen_radiografico,
+          },
+          odontodiagrama: selectedAdmision.historiaClinica.odontodiagrama || {},
+          observaciones: selectedAdmision.historiaClinica.observaciones || "",
+          diagnostico: selectedAdmision.historiaClinica.diagnostico || "",
+          admision_cerrada:
+            selectedAdmision.historiaClinica.admision_cerrada || false,
+        });
+      } else {
+        setFormData(defaultFormData);
+      }
+    }
+  }, [selectedAdmision, admisionId, pacienteId]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -331,6 +346,26 @@ useEffect(() => {
       c_bpartner_id: parseInt(formData.c_bpartner_id, 10),
     };
     onSave(formDataToSend);
+  };
+
+  const handleCerrarAdmision = async () => {
+    try {
+      const response = await fetch(
+        `/api/historia-clinica/${admisionId}/cerrar`,
+        {
+          method: "POST",
+        }
+      );
+      if (response.ok) {
+        setFormData((prev) => ({ ...prev, admision_cerrada: true }));
+        alert("Admisión cerrada con éxito");
+      } else {
+        throw new Error("Error al cerrar la admisión");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error al cerrar la admisión");
+    }
   };
 
   return (
@@ -773,17 +808,68 @@ useEffect(() => {
             initialData={formData.odontodiagrama || {}}
           />
         </div>
+
+        {/* Nueva sección: Observaciones */}
+        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <FaComments className="mr-2 text-blue-500" />
+            Observaciones
+          </h3>
+          <textarea
+            name="observaciones"
+            value={formData.observaciones}
+            onChange={handleInputChange}
+            rows={4}
+            className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500 transition duration-300 ease-in-out"
+            placeholder="Ingrese las observaciones relevantes"
+          />
+        </div>
+
+        {/* Nueva sección: Diagnóstico */}
+        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+          <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <FaStethoscope className="mr-2 text-green-500" />
+            Diagnóstico
+          </h3>
+          <textarea
+            name="diagnostico"
+            value={formData.diagnostico}
+            onChange={handleInputChange}
+            rows={4}
+            className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-blue-500 transition duration-300 ease-in-out"
+            placeholder="Ingrese el diagnóstico del paciente"
+          />
+        </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end space-x-4">
         <button
           type="submit"
-          className="flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out"
+          disabled={formData.admision_cerrada}
+          className={`flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out ${
+            formData.admision_cerrada ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
           <FaSave className="mr-2" />
           Guardar Historia Clínica
         </button>
+        <button
+          type="button"
+          onClick={handleCerrarAdmision}
+          disabled={formData.admision_cerrada}
+          className={`flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-300 ease-in-out ${
+            formData.admision_cerrada ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          <FaLock className="mr-2" />
+          Aprobar y Cerrar Admisión
+        </button>
       </div>
+      {formData.admision_cerrada && (
+        <div className="text-red-600 font-bold text-center mt-4">
+          Esta admisión está cerrada y no puede ser modificada.
+        </div>
+      )}
     </form>
   );
 }
