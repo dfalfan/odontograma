@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import HistoriaClinicaForm from "./HistoriaClinicaForm";
 import { FaLock } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function WelcomeScreen() {
   const [cedula, setCedula] = useState("");
@@ -56,29 +58,32 @@ export default function WelcomeScreen() {
     }
   };
 
-  const handleSaveHistoriaClinica = async (formData) => {
-    try {
-      const response = await fetch("/api/historia-clinica", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!response.ok) {
-        throw new Error("Error al guardar la historia clínica");
-      }
-      console.log("Historia clínica guardada con éxito");
-      // Actualizar el estado local después de guardar
-      setSelectedAdmision((prevState) => ({
-        ...prevState,
-        historiaClinica: formData,
-      }));
-    } catch (error) {
-      console.error("Error al guardar la historia clínica:", error);
-      setError("Error al guardar la historia clínica");
-    }
-  };
+ const handleSaveHistoriaClinica = async (formData) => {
+   try {
+     const response = await fetch("/api/historia-clinica", {
+       method: "POST",
+       headers: {
+         "Content-Type": "application/json",
+       },
+       body: JSON.stringify(formData),
+     });
+     if (!response.ok) {
+       throw new Error("Error al guardar la historia clínica");
+     }
+     console.log("Historia clínica guardada con éxito");
+     toast.success("Historia clínica guardada con éxito");
+     // Actualizar el estado local después de guardar
+     setSelectedAdmision((prevState) => ({
+       ...prevState,
+       historiaClinica: formData,
+     }));
+   } catch (error) {
+     console.error("Error al guardar la historia clínica:", error);
+     setError("Error al guardar la historia clínica");
+     toast.error("Error al guardar la historia clínica");
+   }
+ };
+
 
   // Configuración de las animaciones
   const containerVariants = {
@@ -108,6 +113,7 @@ export default function WelcomeScreen() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 p-8">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="max-w-5xl mx-auto">
         <header className="text-center mb-12">
           <img

@@ -349,22 +349,28 @@ export default function HistoriaClinicaForm({
   };
 
   const handleCerrarAdmision = async () => {
-    try {
-      const response = await fetch(
-        `/api/historia-clinica/${admisionId}/cerrar`,
-        {
-          method: "POST",
+    if (
+      window.confirm(
+        "¿Estás seguro de que quieres cerrar esta admisión? Esta acción no se puede deshacer."
+      )
+    ) {
+      try {
+        const response = await fetch(
+          `/api/historia-clinica/${admisionId}/cerrar`,
+          {
+            method: "POST",
+          }
+        );
+        if (response.ok) {
+          setFormData((prev) => ({ ...prev, admision_cerrada: true }));
+          alert("Admisión cerrada con éxito");
+        } else {
+          throw new Error("Error al cerrar la admisión");
         }
-      );
-      if (response.ok) {
-        setFormData((prev) => ({ ...prev, admision_cerrada: true }));
-        alert("Admisión cerrada con éxito");
-      } else {
-        throw new Error("Error al cerrar la admisión");
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al cerrar la admisión");
       }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Error al cerrar la admisión");
     }
   };
 
