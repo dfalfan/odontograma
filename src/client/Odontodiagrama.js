@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import {
+  toothNames,
+  partTranslations,
+  dentalConditions,
+} from "../utils/odontoConstants";
 
 
 const ToothPart = ({ d, fill, onClick }) => (
@@ -198,85 +203,6 @@ const TeethColumn = ({ adult, child, x, teethState, onToothClick }) => {
   );
 };
 
-const toothNames = {
-  11: "Incisivo central superior derecho",
-  12: "Incisivo lateral superior derecho",
-  13: "Canino superior derecho",
-  14: "Primer premolar superior derecho",
-  15: "Segundo premolar superior derecho",
-  16: "Primer molar superior derecho",
-  17: "Segundo molar superior derecho",
-  18: "Tercer molar superior derecho",
-  21: "Incisivo central superior izquierdo",
-  22: "Incisivo lateral superior izquierdo",
-  23: "Canino superior izquierdo",
-  24: "Primer premolar superior izquierdo",
-  25: "Segundo premolar superior izquierdo",
-  26: "Primer molar superior izquierdo",
-  27: "Segundo molar superior izquierdo",
-  28: "Tercer molar superior izquierdo",
-  31: "Incisivo central inferior izquierdo",
-  32: "Incisivo lateral inferior izquierdo",
-  33: "Canino inferior izquierdo",
-  34: "Primer premolar inferior izquierdo",
-  35: "Segundo premolar inferior izquierdo",
-  36: "Primer molar inferior izquierdo",
-  37: "Segundo molar inferior izquierdo",
-  38: "Tercer molar inferior izquierdo",
-  41: "Incisivo central inferior derecho",
-  42: "Incisivo lateral inferior derecho",
-  43: "Canino inferior derecho",
-  44: "Primer premolar inferior derecho",
-  45: "Segundo premolar inferior derecho",
-  46: "Primer molar inferior derecho",
-  47: "Segundo molar inferior derecho",
-  48: "Tercer molar inferior derecho",
-  // Dientes de leche
-  51: "Incisivo central superior derecho temporal",
-  52: "Incisivo lateral superior derecho temporal",
-  53: "Canino superior derecho temporal",
-  54: "Primer molar superior derecho temporal",
-  55: "Segundo molar superior derecho temporal",
-  61: "Incisivo central superior izquierdo temporal",
-  62: "Incisivo lateral superior izquierdo temporal",
-  63: "Canino superior izquierdo temporal",
-  64: "Primer molar superior izquierdo temporal",
-  65: "Segundo molar superior izquierdo temporal",
-  71: "Incisivo central inferior izquierdo temporal",
-  72: "Incisivo lateral inferior izquierdo temporal",
-  73: "Canino inferior izquierdo temporal",
-  74: "Primer molar inferior izquierdo temporal",
-  75: "Segundo molar inferior izquierdo temporal",
-  81: "Incisivo central inferior derecho temporal",
-  82: "Incisivo lateral inferior derecho temporal",
-  83: "Canino inferior derecho temporal",
-  84: "Primer molar inferior derecho temporal",
-  85: "Segundo molar inferior derecho temporal",
-};
-
-const dentalConditions = [
-  { name: "Diente obturado", code: "Do", color: "blue" },
-  { name: "Cariado", code: "C", color: "red" },
-  { name: "Ausente", code: "=", color: "blue" },
-  { name: "Exodoncia", code: "X", color: "red" },
-  { name: "Caries penetrante", code: "CP", color: "red" },
-  { name: "Retenido", code: "r", color: "red" },
-  { name: "Pieza de puente", code: "PP", color: "blue" },
-  { name: "Corona", code: "Co", color: "blue" },
-  { name: "Prótesis removible", code: "Pr", color: "blue" },
-  { name: "Incrustación", code: "loc", color: "blue" },
-  { name: "Enfermedad periodontal", code: "EP", color: "red" },
-  { name: "Fractura dentaria", code: "FD", color: "red" },
-  { name: "Mal posición dentaria", code: "MPD", color: "red" },
-  { name: "Perno munon", code: "PM", color: "blue" },
-  { name: "Tratamiento de conducto", code: "TC", color: "blue" },
-  { name: "Fluoresis", code: "F", color: "red" },
-  { name: "Implante dental", code: "Imp", color: "blue" },
-  { name: "Mancha blanca", code: "MB", color: "red" },
-  { name: "Sellador", code: "Se", color: "blue" },
-  { name: "Surco profundo o remineralizado", code: "SPSR", color: "blue" },
-  { name: "Hipoplasia de esmalte", code: "Hp", color: "blue" },
-];
 
 function initializeTeethState(initialData = {}) {
   const initialTeethState = Object.fromEntries(
@@ -381,24 +307,13 @@ function Odontodiagrama({ onChange, initialData = {} }) {
         const condition = dentalConditions.find((c) => c.code === code);
         const toothName = toothNames[number] || `Diente ${number}`;
         summary.push(
-          `${toothName} (${number}) superficie ${translatePart(part)} ${
-            condition.name
-          }`
+          `${toothName} (${number}) superficie ${partTranslations[part]} ${condition.name}`
         );
       });
     });
     return summary;
   };
-  const translatePart = (part) => {
-    const translations = {
-      top: "oclusal/incisal",
-      bottom: "oclusal/incisal",
-      left: "vestibular",
-      right: "palatino/lingual",
-      center: "centro",
-    };
-    return translations[part] || part;
-  };
+
 
   const leftColumn = {
     adult: {

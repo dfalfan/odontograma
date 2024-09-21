@@ -1,4 +1,6 @@
 const express = require("express");
+const { generatePDF } = require("./utils/pdfGenerator");
+
 const path = require("path");
 const { Pool } = require("pg");
 const cors = require("cors");
@@ -40,8 +42,9 @@ app.get("/api/paciente/:cedula", async (req, res) => {
         px.birthday::date AS "nacimiento",
         pla.name AS "servicio",
         md.name AS "medico_linea",
-        ad.xx_sede AS "sede",
-        COALESCE(o.admision_cerrada, false) AS "admision_cerrada"
+        ad.xx_sede AS "sede",  
+        COALESCE(o.admision_cerrada, false) AS "admision_cerrada",
+        o.pdf_path AS "pdf_path"
       FROM c_order AS ad
       INNER JOIN c_bpartner AS px ON px.c_bpartner_id = ad.c_bpartner_id
       INNER JOIN c_orderline AS lad ON lad.c_order_id = ad.c_order_id
@@ -180,12 +183,24 @@ app.get("/api/historia-clinica/:admisionId", async (req, res) => {
 
     if (result.rows.length > 0) {
       const historiaClinica = result.rows[0];
-      
+
       // Asegúrate de que los campos JSON se parseen correctamente
-      const jsonFields = ['alergias', 'habitos', 'antecedentes_personales_patologicos', 'intervencion_quirurgica', 'medicamento_actual', 'alergia_latex', 'examen_radiografico', 'odontodiagrama', 'embarazo', 'anticonceptivo', 'reemplazo_hormonal'];
-      
-      jsonFields.forEach(field => {
-        if (typeof historiaClinica[field] === 'string') {
+      const jsonFields = [
+        "alergias",
+        "habitos",
+        "antecedentes_personales_patologicos",
+        "intervencion_quirurgica",
+        "medicamento_actual",
+        "alergia_latex",
+        "examen_radiografico",
+        "odontodiagrama",
+        "embarazo",
+        "anticonceptivo",
+        "reemplazo_hormonal",
+      ];
+
+      jsonFields.forEach((field) => {
+        if (typeof historiaClinica[field] === "string") {
           try {
             historiaClinica[field] = JSON.parse(historiaClinica[field]);
           } catch (e) {
@@ -209,15 +224,71 @@ app.get("/api/historia-clinica/:admisionId", async (req, res) => {
 app.post("/api/historia-clinica/:admisionId/cerrar", async (req, res) => {
   try {
     const { admisionId } = req.params;
+
+    // Obtener la historia clínica completa
     const query = `
-      UPDATE xx_odonto
-      SET admision_cerrada = TRUE
-      WHERE xx_admission = $1
+    SELECT o.*, 
+          px.name AS paciente, 
+          px.value AS cedula, 
+          px.birthday AS nacimiento,
+          o.motivo_consulta,
+          o.enfermedad_actual,
+          o.antecedentes_patologicos_hereditarios,
+          o.alergias,
+          o.es_alergico,
+          o.habitos,
+          o.antecedentes_personales_patologicos,
+          o.intervencion_quirurgica,
+          o.problema_hemorragia,
+          o.medicamento_actual,
+          o.alergia_latex,
+          o.embarazo,
+          o.anticonceptivo,
+          o.reemplazo_hormonal,
+          o.examen_radiografico
+    FROM xx_odonto o
+    JOIN c_bpartner px ON o.c_bpartner_id = px.c_bpartner_id
+    WHERE o.xx_admission = $1
+  `;
+    const result = await pool.query(query, [admisionId]);
+
+    if (result.rows.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "Historia clínica no encontrada" });
+    }
+
+    const historiaClinica = result.rows[0];
+
+    // Generar el nombre del archivo PDF
+    const pdfFileName = `historia_clinica_${admisionId}_${Date.now()}.pdf`;
+    const pdfPath = path.join(
+      "\\\\192.168.5.22\\Datos\\Odontologia\\pdfs",
+      pdfFileName
+    );
+
+    console.log(
+      "Datos de la historia clínica antes de generar PDF:",
+      historiaClinica
+    );
+
+    // Generar el PDF
+    await generatePDF(historiaClinica, pdfPath);
+
+    // Actualizar la base de datos con la ruta del PDF y cerrar la admisión
+    const updateQuery = `
+      UPDATE xx_odonto 
+      SET admision_cerrada = TRUE, pdf_path = $1
+      WHERE xx_admission = $2
     `;
-    await pool.query(query, [admisionId]);
-    res.json({ message: "Admisión cerrada con éxito" });
+    await pool.query(updateQuery, [pdfPath, admisionId]);
+
+    res.json({
+      message: "Admisión cerrada y PDF generado con éxito",
+      pdfPath,
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Error al cerrar la admisión:", err);
     res.status(500).json({ message: "Error al cerrar la admisión" });
   }
 });
