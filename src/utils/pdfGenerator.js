@@ -448,6 +448,13 @@ function generatePDF(historiaClinica, filePath) {
 
       doc.moveDown();
 
+      // Forzar tercera página
+      while (doc.page.number < 2) {
+        doc.addPage();
+      }
+      doc.addPage();
+      doc.y = doc.page.margins.top;
+
       // Odontograma
       addSection("Odontograma");
 
@@ -462,7 +469,7 @@ function generatePDF(historiaClinica, filePath) {
         doc.image(historiaClinica.odontogramaImagePath, {
           fit: [500, 300],
           align: "center",
-          valign: "center",
+          valign: "top",
         });
         doc.moveDown();
       } else {
@@ -472,7 +479,7 @@ function generatePDF(historiaClinica, filePath) {
         );
       }
 
-      doc.moveDown();
+      doc.moveDown(15);
 
       const odontodata =
         typeof historiaClinica.odontodiagrama === "string"
@@ -490,6 +497,24 @@ function generatePDF(historiaClinica, filePath) {
         doc.text("No se registraron detalles en el odontograma.");
       }
 
+      doc.moveDown();
+
+      // Observaciones
+      addSection("Observaciones");
+      doc
+        .font("Regular")
+        .fontSize(12)
+        .fillColor(colors.secondary)
+        .text(historiaClinica.observaciones || "No especificados");
+      doc.moveDown();
+
+      // Diagnóstico
+      addSection("Diagnóstico");
+      doc
+        .font("Regular")
+        .fontSize(12)
+        .fillColor(colors.secondary)
+        .text(historiaClinica.diagnostico || "No especificados");
       doc.moveDown();
 
       doc.end();
