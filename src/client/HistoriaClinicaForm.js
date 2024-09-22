@@ -14,6 +14,7 @@ import {
   FaStethoscope,
   FaLock,
 } from "react-icons/fa";
+import html2canvas from "html2canvas";
 
 export default function HistoriaClinicaForm({
   pacienteId,
@@ -355,6 +356,13 @@ export default function HistoriaClinicaForm({
       )
     ) {
       try {
+        // Primero, generar y enviar la imagen del odontograma
+        const imageData = await exportToImage();
+        if (imageData) {
+          await sendImageToServer(imageData);
+        }
+
+        // Luego, proceder con el cierre de la admisión
         const response = await fetch(
           `/api/historia-clinica/${admisionId}/cerrar`,
           {
@@ -369,8 +377,58 @@ export default function HistoriaClinicaForm({
         }
       } catch (error) {
         console.error("Error:", error);
-        alert("Error al cerrar la admisión");
+        alert("Error al cerrar la admisión" + error.message);
       }
+    }
+  };
+
+  const exportToImage = () => {
+    console.log("Iniciando exportación de imagen del odontograma");
+    return new Promise((resolve, reject) => {
+      const odontogramaElement = document.getElementById(
+        "odontograma-container"
+      );
+      if (!odontogramaElement) {
+        console.error("No se encontró el elemento del odontograma");
+        reject("No se encontró el elemento del odontograma");
+        return;
+      }
+
+      html2canvas(odontogramaElement)
+        .then((canvas) => {
+          const imageData = canvas.toDataURL("image/png");
+          console.log("Tamaño de la imagen:", imageData.length);
+          console.log(
+            "Imagen del odontograma generada, tamaño:",
+            imageData.length
+          );
+          resolve(imageData);
+        })
+        .catch((error) => {
+          console.error("Error al generar la imagen del odontograma:", error);
+          reject(error);
+        });
+    });
+  };
+
+  const sendImageToServer = async (imageData) => {
+    console.log("Iniciando envío de imagen al servidor");
+    try {
+      console.log("Tamaño de la imagen:", imageData.length); 
+      console.log("Enviando imagen del odontograma al servidor...");
+      const response = await fetch("/api/save-odontograma-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ image: imageData }),
+      });
+      if (!response.ok) throw new Error("Error al enviar la imagen");
+      const result = await response.json();
+      console.log("Respuesta del servidor:", result);
+    } catch (error) {
+      console.error("Error al enviar la imagen:", error);
+      throw error;
     }
   };
 
@@ -808,7 +866,9 @@ export default function HistoriaClinicaForm({
         </div>
 
         {/* Odontodiagrama */}
-        <div className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl">
+        <div
+          className="bg-white shadow-lg rounded-lg p-6 transition duration-300 ease-in-out hover:shadow-xl"
+        >
           <Odontodiagrama
             onChange={handleOdontodiagramaChange}
             initialData={formData.odontodiagrama || {}}

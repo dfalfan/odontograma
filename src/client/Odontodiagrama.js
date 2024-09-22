@@ -6,7 +6,6 @@ import {
   dentalConditions,
 } from "../utils/odontoConstants";
 
-
 const ToothPart = ({ d, fill, onClick }) => (
   <motion.path
     d={d}
@@ -18,7 +17,6 @@ const ToothPart = ({ d, fill, onClick }) => (
     whileTap={{ scale: 0.9 }}
   />
 );
-
 
 const Tooth = ({ number, parts, onClick }) => {
   const size = 30;
@@ -203,7 +201,6 @@ const TeethColumn = ({ adult, child, x, teethState, onToothClick }) => {
   );
 };
 
-
 function initializeTeethState(initialData = {}) {
   const initialTeethState = Object.fromEntries(
     [...Array(89).keys()].map((n) => [
@@ -234,7 +231,6 @@ function initializeTeethState(initialData = {}) {
   return initialTeethState;
 }
 
-
 function Odontodiagrama({ onChange, initialData = {} }) {
   const [teethState, setTeethState] = useState(() =>
     initializeTeethState(initialData)
@@ -250,6 +246,10 @@ function Odontodiagrama({ onChange, initialData = {} }) {
   }, [initialData]);
 
   const handleToothClick = (number, part) => {
+    console.log(
+      `handleToothClick llamado para diente ${number}, parte ${part}`
+    );
+
     setTeethState((prevState) => {
       const newState = { ...prevState[number][part] };
 
@@ -289,8 +289,7 @@ function Odontodiagrama({ onChange, initialData = {} }) {
           }
         }
 
-        // Llamar a onChange después de actualizar el estado
-        setTimeout(() => onChange(updatedState, newOdonto), 0);
+        onChange(updatedState, newOdonto);
 
         return newOdonto;
       });
@@ -313,7 +312,6 @@ function Odontodiagrama({ onChange, initialData = {} }) {
     });
     return summary;
   };
-
 
   const leftColumn = {
     adult: {
@@ -351,7 +349,10 @@ function Odontodiagrama({ onChange, initialData = {} }) {
           </motion.button>
         ))}
       </div>
-      <div className="bg-gray-50 p-4 rounded-lg mb-4">
+      <div
+        id="odontograma-container"
+        className="bg-gray-50 p-4 rounded-lg mb-4"
+      >
         <svg width="100%" height="auto" viewBox="0 0 600 300">
           <TeethColumn
             {...leftColumn}

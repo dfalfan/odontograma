@@ -33,6 +33,8 @@ function generatePDF(historiaClinica, filePath) {
       });
       const stream = fs.createWriteStream(filePath);
 
+      console.log("Archivo de salida del PDF:", filePath);
+
       stream.on("error", (err) => {
         console.error("Error en el stream de escritura:", err);
         reject(err);
@@ -449,6 +451,29 @@ function generatePDF(historiaClinica, filePath) {
       // Odontograma
       addSection("Odontograma");
 
+      if (
+        historiaClinica.odontogramaImagePath &&
+        fs.existsSync(historiaClinica.odontogramaImagePath)
+      ) {
+        console.log(
+          "Añadiendo imagen del odontograma:",
+          historiaClinica.odontogramaImagePath
+        );
+        doc.image(historiaClinica.odontogramaImagePath, {
+          fit: [500, 300],
+          align: "center",
+          valign: "center",
+        });
+        doc.moveDown();
+      } else {
+        console.log(
+          "No se encontró la imagen del odontograma o la ruta es inválida:",
+          historiaClinica.odontogramaImagePath
+        );
+      }
+
+      doc.moveDown();
+
       const odontodata =
         typeof historiaClinica.odontodiagrama === "string"
           ? JSON.parse(historiaClinica.odontodiagrama)
@@ -470,7 +495,8 @@ function generatePDF(historiaClinica, filePath) {
       doc.end();
 
       stream.on("finish", () => {
-        console.log("PDF generado con éxito en:", filePath);
+        console.log("PDF generado con éxito:", filePath);
+        // Ya no eliminamos la imagen temporal
         resolve();
       });
     } catch (err) {

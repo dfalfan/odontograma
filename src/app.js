@@ -1,11 +1,15 @@
 const express = require("express");
-const { generatePDF } = require("./utils/pdfGenerator");
-
+const fs = require("fs");
 const path = require("path");
+const { generatePDF } = require("./utils/pdfGenerator");
+const PDFDocument = require("pdfkit");
 const { Pool } = require("pg");
 const cors = require("cors");
 const app = express();
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 const port = process.env.PORT || 3000;
+const imageDir = "\\\\192.168.5.22\\Datos\\Odontologia\\pdfs\\.images";
 
 const pool = new Pool({
   user: "adempiere",
@@ -20,6 +24,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "../public")));
+
+// Configuración de bodyParser
+const bodyParser = require("body-parser");
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
 // Rutas
 app.get("/", (req, res) => {
@@ -220,6 +229,29 @@ app.get("/api/historia-clinica/:admisionId", async (req, res) => {
   }
 });
 
+// Ruta para guardar la imagen del odontograma
+app.post("/api/save-odontograma-image", async (req, res) => {
+  const { image } = req.body;
+  if (!image) {
+    console.error("No se recibió imagen");
+    return res.status(400).json({ message: "No se proporcionó imagen" });
+  }
+
+  const base64Data = image.replace(/^data:image\/png;base64,/, "");
+  const fileName = `odontograma_${Date.now()}.png`;
+  const filePath = path.join(imageDir, fileName);
+  console.log("Intentando guardar la imagen en:", filePath);
+
+  fs.writeFile(filePath, base64Data, "base64", (err) => {
+    if (err) {
+      console.error("Error al guardar la imagen:", err);
+      return res.status(500).json({ message: "Error al guardar la imagen" });
+    }
+    console.log("Imagen guardada con éxito en:", filePath);
+    res.json({ message: "Imagen guardada con éxito", fileName });
+  });
+});
+
 // Ruta para cerrar la admisión
 app.post("/api/historia-clinica/:admisionId/cerrar", async (req, res) => {
   try {
@@ -271,6 +303,29 @@ app.post("/api/historia-clinica/:admisionId/cerrar", async (req, res) => {
       "Datos de la historia clínica antes de generar PDF:",
       historiaClinica
     );
+
+    // Buscar la imagen más reciente del odontograma
+    const odontogramaImageDir =
+      "\\\\192.168.5.22\\Datos\\Odontologia\\pdfs\\.images";
+    const odontogramaImages = fs
+      .readdirSync(odontogramaImageDir)
+      .filter((file) => file.startsWith(`odontograma_`))
+      .sort((a, b) => b.localeCompare(a)); // Ordena de más reciente a más antiguo
+
+    console.log("Imágenes de odontograma encontradas:", odontogramaImages);
+
+    if (odontogramaImages.length > 0) {
+      historiaClinica.odontogramaImagePath = path.join(
+        odontogramaImageDir,
+        odontogramaImages[0]
+      );
+      console.log(
+        "Imagen de odontograma seleccionada:",
+        historiaClinica.odontogramaImagePath
+      );
+    } else {
+      console.log("No se encontraron imágenes de odontograma");
+    }
 
     // Generar el PDF
     await generatePDF(historiaClinica, pdfPath);
