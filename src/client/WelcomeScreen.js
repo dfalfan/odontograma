@@ -236,8 +236,8 @@ export default function WelcomeScreen() {
                           selectedAdmision.admision === estudio.admision
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : estudio.admision_cerrada
-                            ? "bg-gray-400 text-white"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                            ? "bg-gray-200 text-gray-400"
+                            : "bg-gray-400 text-white hover:bg-gray-600"
                         }`}
                       >
                         {selectedAdmision &&
