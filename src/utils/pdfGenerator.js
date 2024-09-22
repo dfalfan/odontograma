@@ -521,7 +521,36 @@ function generatePDF(historiaClinica, filePath) {
 
       stream.on("finish", () => {
         console.log("PDF generado con éxito:", filePath);
-        // Ya no eliminamos la imagen temporal
+
+        // Eliminar la imagen temporal
+        if (historiaClinica.odontogramaImagePath) {
+          fs.unlink(historiaClinica.odontogramaImagePath, (err) => {
+            if (err) {
+              console.error("Error al eliminar la imagen temporal:", err);
+            } else {
+              console.log("Imagen temporal eliminada con éxito");
+            }
+          });
+        }
+
+        // Opcional: Eliminar todas las imágenes en el directorio .images
+        const imagesDir = path.join(__dirname, ".images");
+        fs.readdir(imagesDir, (err, files) => {
+          if (err) {
+            console.error("Error al leer el directorio .images:", err);
+          } else {
+            files.forEach((file) => {
+              fs.unlink(path.join(imagesDir, file), (err) => {
+                if (err) {
+                  console.error(`Error al eliminar ${file}:`, err);
+                } else {
+                  console.log(`${file} eliminado con éxito`);
+                }
+              });
+            });
+          }
+        });
+
         resolve();
       });
     } catch (err) {
